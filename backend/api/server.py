@@ -478,6 +478,13 @@ MAIN_HTML = r"""<!DOCTYPE html>
       padding: 40px 36px; max-width: 440px; width: 90%;
       border: 1px solid var(--border-glass);
       box-shadow: 0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+      transform: scale(0.95); transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal-overlay.visible .modal-box { transform: scale(1); }
+    .modal-box.wide { max-width: 700px; padding: 40px 48px; }
+    .ai-rationale-list { margin-top: 24px; display: flex; flex-direction: column; gap: 20px; text-align: left; }
+    .ai-rationale-item h4 { color: var(--accent-gold); margin: 0 0 8px 0; font-size: 16px; font-weight: 600; letter-spacing: 0.2px; }
+    .ai-rationale-item p { color: var(--text-secondary); margin: 0; font-size: 14px; line-height: 1.6; }
       text-align: center;
       transform: scale(0.85) translateY(20px);
       transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -791,6 +798,7 @@ MAIN_HTML = r"""<!DOCTYPE html>
     </div>
     <div class="header-actions">
       <span class="stats-pill" id="statsPill">100 reviews · 2 sources</span>
+      <button class="btn-rde" id="showAiRationale" onclick="showAIModal()" style="margin-right: 12px; background: rgba(192, 57, 43, 0.1); border-color: rgba(192, 57, 43, 0.3); color: var(--accent-red-bright);">✨ Why AI?</button>
       <button class="btn-rde" id="openRDE" onclick="showRDE()">Discovery Engine</button>
     </div>
   </header>
@@ -821,6 +829,33 @@ MAIN_HTML = r"""<!DOCTYPE html>
       <div class="modal-actions">
         <button class="btn-repair-submit" onclick="submitRepair()">Adjust</button>
         <button class="btn-repair-dismiss" onclick="dismissRepair()">No thanks</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── AI Rationale Modal ──────────────────────── -->
+  <div class="modal-overlay" id="aiModal">
+    <div class="modal-box wide">
+      <h3>🤖 Why AI is Uniquely Suited</h3>
+      <p style="color: var(--text-subdued); margin-top: 8px;">Our research shows this is a <strong>trust</strong> problem, not just an accuracy problem. Here is why Generative AI + RAG is required.</p>
+      
+      <div class="ai-rationale-list">
+        <div class="ai-rationale-item">
+          <h4>1. Why traditional recommendation systems are insufficient</h4>
+          <p>Collaborative filtering is excellent at predicting what a user might like based on vectors. However, it operates as a "black box." It silently hands users tracks but cannot generate a human-readable sentence explaining <em>why</em>. When a traditional recommendation misses, it fails silently—leaving the user with no explanation and no way to course-correct other than skipping.</p>
+        </div>
+        <div class="ai-rationale-item">
+          <h4>2. What AI unlocks that was previously difficult</h4>
+          <p>Generative AI bridges the communication gap. It translates vector similarities into natural language ("Similar layered vocals to Fleet Foxes"). Furthermore, RAG (Retrieval-Augmented Generation) unlocks <strong>peer proof at scale</strong>—allowing us to instantly query thousands of real user reviews to find a quote that validates the recommendation. Finally, AI enables natural language repair, allowing users to say "too slow" and have the system interpret that feedback dynamically.</p>
+        </div>
+        <div class="ai-rationale-item">
+          <h4>3. How AI changes the user experience</h4>
+          <p>It transforms passive consumption into a transparent dialogue. By providing an explanation ("Why This") and a real user quote ("Listeners Said"), we build trust <em>before</em> the user even presses play. When a miss inevitably happens, the AI-powered repair prompt transforms a frustrating exit moment into a constructive feedback loop, preventing weeks of disengagement.</p>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 32px; justify-content: center;">
+        <button class="btn-repair-dismiss" onclick="dismissAIModal()">Close</button>
       </div>
     </div>
   </div>
@@ -1147,6 +1182,13 @@ MAIN_HTML = r"""<!DOCTYPE html>
         hideRDE();
       }
     });
+    /* ─── AI Modal Logic ────────────── */
+    function showAIModal() {
+      document.getElementById("aiModal").classList.add("visible");
+    }
+    function dismissAIModal() {
+      document.getElementById("aiModal").classList.remove("visible");
+    }
   </script>
 </body>
 </html>"""
