@@ -81,8 +81,8 @@ MAIN_HTML = r"""<!DOCTYPE html>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg-primary: #0c0604;
-      --bg-warm: #110907;
+      --bg-primary: #1A0D08;
+      --bg-warm: #26130B;
       --bg-card: rgba(40, 22, 12, 0.55);
       --bg-card-hover: rgba(55, 30, 16, 0.65);
       --bg-elevated: rgba(50, 28, 14, 0.8);
@@ -117,9 +117,9 @@ MAIN_HTML = r"""<!DOCTYPE html>
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
       background: var(--bg-primary);
       background-image:
-        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(192,57,43,0.08) 0%, transparent 50%),
-        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(212,160,23,0.06) 0%, transparent 50%),
-        radial-gradient(ellipse 50% 50% at 10% 60%, rgba(92,58,30,0.08) 0%, transparent 50%);
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(220,38,38,0.12) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(212,160,23,0.1) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 50% at 10% 60%, rgba(139,69,19,0.15) 0%, transparent 50%);
       background-attachment: fixed;
       color: var(--text-primary);
       min-height: 100vh;
@@ -252,12 +252,9 @@ MAIN_HTML = r"""<!DOCTYPE html>
     /* ── Track Cards ──────────────────────── */
     .track-list { display: flex; flex-direction: column; gap: 20px; }
     .track-card {
-      display: flex; gap: 22px; padding: 24px;
-      background: var(--bg-card);
-      backdrop-filter: blur(40px) saturate(160%);
-      background: linear-gradient(160deg, rgba(28,28,30,0.9), rgba(18,18,20,0.95));
+      background: linear-gradient(160deg, rgba(60, 25, 15, 0.9), rgba(40, 15, 8, 0.95));
       border-radius: var(--radius-lg); padding: 24px;
-      display: flex; gap: 24px; border: 1px solid rgba(255,255,255,0.06);
+      display: flex; gap: 24px; border: 1px solid rgba(212, 160, 23, 0.2);
       transition: all var(--transition);
       position: relative; overflow: hidden;
       box-shadow: 0 12px 32px rgba(0,0,0,0.4);
@@ -298,7 +295,7 @@ MAIN_HTML = r"""<!DOCTYPE html>
       width: 120px; height: 120px; border-radius: 8px;
       flex-shrink: 0; position: relative; overflow: hidden;
       box-shadow: 0 8px 24px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.1);
+      border: 1px solid rgba(212, 160, 23, 0.3);
     }
     .track-art::after {
       content: '';
@@ -343,15 +340,15 @@ MAIN_HTML = r"""<!DOCTYPE html>
     }
     .track-meta .dot { width: 4px; height: 4px; border-radius: 50%; background: #636366; display: inline-block; }
 
-    /* ── Why This Section (Enhanced) ──────── */
+    /* ── Why This Section (Gold/Brown) ──────── */
     .why-this-section {
       margin-top: 16px; padding: 18px 24px;
-      background: linear-gradient(135deg, rgba(212,160,23,0.06), rgba(0,0,0,0.2));
+      background: linear-gradient(135deg, rgba(212,160,23,0.15), rgba(92,30,10,0.4));
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-radius: 12px;
-      border: 1px solid rgba(212,160,23,0.15);
-      border-left: 4px solid var(--accent-gold);
+      border: 1px solid rgba(212,160,23,0.3);
+      border-left: 4px solid var(--accent-gold-light);
       position: relative;
       transition: all var(--transition);
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
@@ -377,15 +374,15 @@ MAIN_HTML = r"""<!DOCTYPE html>
       font-weight: 400; letter-spacing: 0.2px;
     }
 
-    /* ── Listeners Said Section (Enhanced) ── */
+    /* ── Listeners Said Section (Red/Brown) ── */
     .listeners-section {
       margin-top: 12px; padding: 18px 24px;
-      background: linear-gradient(135deg, rgba(192,57,43,0.04), rgba(0,0,0,0.2));
+      background: linear-gradient(135deg, rgba(220,38,38,0.12), rgba(92,10,10,0.3));
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-radius: 12px;
-      border: 1px solid rgba(192,57,43,0.15);
-      border-left: 4px solid var(--accent-red);
+      border: 1px solid rgba(220,38,38,0.25);
+      border-left: 4px solid var(--accent-red-bright);
       position: relative;
       transition: all var(--transition);
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
