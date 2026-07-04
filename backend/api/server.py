@@ -481,13 +481,68 @@ MAIN_HTML = r"""<!DOCTYPE html>
       transform: scale(0.95); transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .modal-overlay.visible .modal-box { transform: scale(1); }
-    .modal-box.wide { max-width: 700px; padding: 40px 48px; }
-    .ai-rationale-list { margin-top: 24px; display: flex; flex-direction: column; gap: 20px; text-align: left; }
-    .ai-rationale-item h4 { color: var(--accent-gold); margin: 0 0 8px 0; font-size: 16px; font-weight: 600; letter-spacing: 0.2px; }
-    .ai-rationale-item p { color: var(--text-secondary); margin: 0; font-size: 14px; line-height: 1.6; }
-      text-align: center;
-      transform: scale(0.85) translateY(20px);
-      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    .modal-box.wide { max-width: 850px; padding: 48px; }
+    
+    .ai-rationale-header { text-align: center; margin-bottom: 32px; }
+    .ai-rationale-header h3 { font-size: 28px; margin-bottom: 12px; }
+    .ai-rationale-header p { font-size: 16px; color: var(--text-secondary); max-width: 600px; margin: 0 auto; line-height: 1.5; }
+    
+    .ai-rationale-list { 
+      margin-top: 24px; 
+      display: grid; 
+      grid-template-columns: repeat(3, 1fr); 
+      gap: 24px; 
+      text-align: left; 
+    }
+    
+    .ai-rationale-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .ai-rationale-item::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+      opacity: 0; transition: opacity 0.3s ease;
+    }
+    
+    .ai-rationale-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+    }
+    
+    .ai-rationale-item:hover::before { opacity: 1; }
+    
+    .ai-icon-wrapper {
+      font-size: 28px; margin-bottom: 16px; display: inline-block;
+      background: rgba(212,160,23,0.1);
+      padding: 12px; border-radius: 50%;
+      border: 1px solid rgba(212,160,23,0.2);
+    }
+    
+    .ai-rationale-item h4 { 
+      color: var(--text-primary); 
+      margin: 0 0 12px 0; 
+      font-size: 16px; 
+      font-weight: 700; 
+      line-height: 1.3;
+    }
+    
+    .ai-rationale-item p { 
+      color: var(--text-secondary); 
+      margin: 0; 
+      font-size: 14px; 
+      line-height: 1.6; 
+    }
+
+    @media (max-width: 768px) {
+      .ai-rationale-list { grid-template-columns: 1fr; }
     }
     .modal-overlay.visible .modal-box { transform: scale(1) translateY(0); }
     .modal-box h3 {
@@ -836,26 +891,34 @@ MAIN_HTML = r"""<!DOCTYPE html>
   <!-- ─── AI Rationale Modal ──────────────────────── -->
   <div class="modal-overlay" id="aiModal">
     <div class="modal-box wide">
-      <h3>🤖 Why AI is Uniquely Suited</h3>
-      <p style="color: var(--text-subdued); margin-top: 8px;">Our research shows this is a <strong>trust</strong> problem, not just an accuracy problem. Here is why Generative AI + RAG is required.</p>
+      
+      <div class="ai-rationale-header">
+        <h3>🤖 Why AI is Uniquely Suited</h3>
+        <p>Our research shows this is a <strong>trust</strong> problem, not just an accuracy problem. Here is why Generative AI + RAG is required to solve it.</p>
+      </div>
       
       <div class="ai-rationale-list">
         <div class="ai-rationale-item">
-          <h4>1. Why traditional recommendation systems are insufficient</h4>
-          <p>Collaborative filtering is excellent at predicting what a user might like based on vectors. However, it operates as a "black box." It silently hands users tracks but cannot generate a human-readable sentence explaining <em>why</em>. When a traditional recommendation misses, it fails silently—leaving the user with no explanation and no way to course-correct other than skipping.</p>
+          <div class="ai-icon-wrapper">📉</div>
+          <h4>Why traditional systems fail</h4>
+          <p>Collaborative filtering is excellent at predicting vectors, but it operates as a "black box." It silently hands users tracks without explaining <em>why</em>. When it misses, it fails silently—leaving the user with no recourse other than skipping.</p>
         </div>
+        
         <div class="ai-rationale-item">
-          <h4>2. What AI unlocks that was previously difficult</h4>
-          <p>Generative AI bridges the communication gap. It translates vector similarities into natural language ("Similar layered vocals to Fleet Foxes"). Furthermore, RAG (Retrieval-Augmented Generation) unlocks <strong>peer proof at scale</strong>—allowing us to instantly query thousands of real user reviews to find a quote that validates the recommendation. Finally, AI enables natural language repair, allowing users to say "too slow" and have the system interpret that feedback dynamically.</p>
+          <div class="ai-icon-wrapper">🔓</div>
+          <h4>What Gen-AI + RAG unlocks</h4>
+          <p>AI bridges the communication gap by translating vector similarities into natural language ("Similar layered vocals to Fleet Foxes"). RAG provides <strong>peer proof at scale</strong> by instantly retrieving real user reviews. AI also enables natural language repair (e.g., "too slow").</p>
         </div>
+        
         <div class="ai-rationale-item">
-          <h4>3. How AI changes the user experience</h4>
-          <p>It transforms passive consumption into a transparent dialogue. By providing an explanation ("Why This") and a real user quote ("Listeners Said"), we build trust <em>before</em> the user even presses play. When a miss inevitably happens, the AI-powered repair prompt transforms a frustrating exit moment into a constructive feedback loop, preventing weeks of disengagement.</p>
+          <div class="ai-icon-wrapper">✨</div>
+          <h4>How the UX changes</h4>
+          <p>It transforms passive consumption into a transparent dialogue. By providing an explanation ("Why This"), we build trust <em>before</em> play. When a miss happens, the repair prompt turns a frustrating exit into a constructive feedback loop.</p>
         </div>
       </div>
 
-      <div class="modal-actions" style="margin-top: 32px; justify-content: center;">
-        <button class="btn-repair-dismiss" onclick="dismissAIModal()">Close</button>
+      <div class="modal-actions" style="margin-top: 40px; justify-content: center;">
+        <button class="btn-repair-dismiss" onclick="dismissAIModal()" style="padding: 12px 32px; font-size: 15px;">Close Panel</button>
       </div>
     </div>
   </div>
