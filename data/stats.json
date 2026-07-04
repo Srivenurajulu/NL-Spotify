@@ -1,0 +1,10 @@
+{
+  "total_documents": 100,
+  "last_scraped": "2026-07-01",
+  "sources": {
+    "google_play": 50,
+    "app_store": 50
+  },
+  "collection": "spotify_reviews",
+  "chroma_path": "/Users/srivenurajulu/Documents/NL-Spotify/data/chroma"
+}

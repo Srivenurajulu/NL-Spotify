@@ -1,0 +1,64 @@
+[
+  {
+    "id": "ca34eb6cee4d5ac3",
+    "source": "app_store",
+    "date": "2026-06-05",
+    "text": "Chill with the ads",
+    "url": "https://apps.apple.com/us/app/spotify-music-and-podcasts/id324684580",
+    "score": 5,
+    "author": null,
+    "behavior_tags": [
+      "ads"
+    ]
+  },
+  {
+    "id": "332a1aae9aaa3f84",
+    "source": "app_store",
+    "date": "2026-06-11",
+    "text": "Work needed",
+    "url": "https://apps.apple.com/us/app/spotify-music-and-podcasts/id324684580",
+    "score": 4,
+    "author": null,
+    "behavior_tags": []
+  },
+  {
+    "id": "f46036fb1db45ced",
+    "source": "app_store",
+    "date": "2026-06-11",
+    "text": "Don\u00e2\u0080\u0099t bother",
+    "url": "https://apps.apple.com/us/app/spotify-music-and-podcasts/id324684580",
+    "score": 5,
+    "author": null,
+    "behavior_tags": []
+  },
+  {
+    "id": "5092b7eab3b98f45",
+    "source": "app_store",
+    "date": "2026-06-03",
+    "text": "Amazing",
+    "url": "https://apps.apple.com/us/app/spotify-music-and-podcasts/id324684580",
+    "score": 5,
+    "author": null,
+    "behavior_tags": []
+  },
+  {
+    "id": "9eac2c9974611c5c",
+    "source": "app_store",
+    "date": "2026-06-07",
+    "text": "Best song app every",
+    "url": "https://apps.apple.com/us/app/spotify-music-and-podcasts/id324684580",
+    "score": 5,
+    "author": null,
+    "behavior_tags": []
+  },
+  {
+    "id": "4a46c622ca2a1d56",
+    "source": "app_store",
+    "date": "2026-06-09",
+    "text": "Really Great, but one thing.",
+    "url": "https://apps.apple.com/us/app/spotify-music-and-podcasts/id324684580",
+    "score": 5,
+    "author": null,
+    "behavior_tags": []
+  }
+]
