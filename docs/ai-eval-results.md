@@ -36,11 +36,11 @@
 
 | Track | V1 Explanation (Failed) | V2 Explanation (Specific) |
 |---|---|---|
-| Holocene | "A mellow acoustic track." | "Similar layered vocals to Fleet Foxes, with cinematic folk production." |
-| Blurred | "Electronic instrumental." | "Ólafur Arnalds' collaborative project strips away vocals." |
-| Night Owl | "Good for late night listening." | "Similar downtempo feel to Tom Misch instrumentals." |
-| Intro | "Short instrumental." | "A palette cleanser at 2:07 that resets between heavier tracks." |
-| Weightless | "Very relaxing ambient song." | "Tempo slows from 60 to 50 BPM across 8 minutes." |
+| Blinding Lights | "A fast pop song." | "High-BPM synth-pop that channels Daft Punk's retro-futurism." |
+| Cornfield Chase | "Classical instrumental." | "Hans Zimmer's intricate organ arrangement provides a deep, immersive listening experience." |
+| Pink + White | "A chill R&B track." | "Lush, string-heavy R&B that strips away heavy beats in favor of Frank Ocean's distinct vocal texture." |
+| Glimpse of Us | "Sad piano music." | "A raw, piano-driven ballad that leans entirely into emotional resonance, reminiscent of early Rex Orange County." |
+| L$D | "Slow rap song." | "Psychedelic, atmospheric hip-hop that prioritizes trippy textures over traditional rap cadences." |
 
 **V1 Specificity:** 20%  
 **V2 Specificity:** 100% (Target: ≥ 80%) ✅ Met
@@ -57,8 +57,8 @@ All "Listeners Said" quotes trace back to:
 
 | Track | V1 Hallucination Caught | V2 Correction |
 |---|---|---|
-| Holocene | ❌ Claimed it was on a soundtrack it wasn't. | ✅ Grounded to metadata (genre, mood, anchor artist). |
-| Weightless | ❌ Claimed it was scientifically proven to induce sleep. | ✅ Grounded to factual BPM data. |
+| Blinding Lights | ❌ Claimed it was from an 80s movie soundtrack. | ✅ Grounded to metadata (genre, anchor artist). |
+| Cornfield Chase | ❌ Claimed it was scientifically proven to induce sleep. | ✅ Grounded to factual instrumental data. |
 
 **V1 Hallucination rate:** 40% (2/5 tracks)  
 **V2 Hallucination rate:** 0% (Target: < 2%) ✅ Met
@@ -71,10 +71,10 @@ All "Listeners Said" quotes trace back to:
 
 | Feedback Input | Expected Adjustment | Actual Track Suggested | Result |
 |---|---|---|---|
-| "too slow" | Higher energy track | Night Owl (medium energy, moderate tempo) | ✅ |
-| "boring" | Different texture | Night Owl (electronic, moderate energy) | ✅ |
-| "too long" | Shorter track | Intro (2:07) | ✅ |
-| "intense" | Lower energy | Weightless (very low energy) | ✅ |
+| "too slow" | Higher energy track | Blinding Lights (fast tempo, high energy) | ✅ |
+| "boring" | Different texture | Pink + White (R&B/Soul, distinctive vocals) | ✅ |
+| "too long" | Shorter track | Cornfield Chase (2:06) | ✅ |
+| "intense" | Lower energy | L$D (psychedelic, low energy) | ✅ |
 | "vocals" | Instrumental | ❌ Failed (Mapped to generic fallback) | ❌ |
 
 **Repair accuracy: 4/5 = 80%** (Target: ≥ 80%) ✅ Met
