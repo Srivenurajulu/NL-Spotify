@@ -255,19 +255,16 @@ MAIN_HTML = r"""<!DOCTYPE html>
       display: flex; gap: 22px; padding: 24px;
       background: var(--bg-card);
       backdrop-filter: blur(40px) saturate(160%);
-      -webkit-backdrop-filter: blur(40px) saturate(160%);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border-glass);
-      box-shadow: var(--shadow-glass);
+      background: linear-gradient(160deg, rgba(28,28,30,0.9), rgba(18,18,20,0.95));
+      border-radius: var(--radius-lg); padding: 24px;
+      display: flex; gap: 24px; border: 1px solid rgba(255,255,255,0.06);
       transition: all var(--transition);
-      animation: fadeSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
-      position: relative;
-      overflow: hidden;
+      position: relative; overflow: hidden;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
     }
     .track-card::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(212,160,23,0.2), rgba(192,57,43,0.15), transparent);
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), rgba(212,160,23,0.3), transparent);
     }
     .track-card:hover {
       background: var(--bg-card-hover);
@@ -298,9 +295,10 @@ MAIN_HTML = r"""<!DOCTYPE html>
 
     /* ── Track Art (Vinyl Style) ──────────── */
     .track-art {
-      width: 100px; height: 100px; border-radius: var(--radius-md);
+      width: 120px; height: 120px; border-radius: 8px;
       flex-shrink: 0; position: relative; overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.1);
     }
     .track-art::after {
       content: '';
@@ -330,31 +328,33 @@ MAIN_HTML = r"""<!DOCTYPE html>
       margin-bottom: 4px;
     }
     .track-title {
-      font-size: 18px; font-weight: 700;
+      font-size: 22px; font-weight: 800;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      letter-spacing: -0.3px;
+      letter-spacing: -0.5px; color: #ffffff;
     }
     .track-artist {
-      font-size: 14px; color: var(--accent-gold-warm);
-      font-weight: 500; white-space: nowrap;
+      font-size: 16px; color: var(--accent-gold);
+      font-weight: 600; white-space: nowrap;
     }
     .track-meta {
-      font-size: 12px; color: var(--text-subdued); margin-top: 2px;
-      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; color: #8E8E93; margin-top: 4px;
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 500;
     }
-    .track-meta .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text-subdued); display: inline-block; }
+    .track-meta .dot { width: 4px; height: 4px; border-radius: 50%; background: #636366; display: inline-block; }
 
     /* ── Why This Section (Enhanced) ──────── */
     .why-this-section {
-      margin-top: 14px; padding: 16px 18px;
-      background: linear-gradient(135deg, rgba(212,160,23,0.08), rgba(192,57,43,0.04));
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: var(--radius-md);
-      border: 1px solid rgba(212,160,23,0.12);
-      border-left: 3px solid var(--accent-gold);
+      margin-top: 16px; padding: 18px 24px;
+      background: linear-gradient(135deg, rgba(212,160,23,0.06), rgba(0,0,0,0.2));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 12px;
+      border: 1px solid rgba(212,160,23,0.15);
+      border-left: 4px solid var(--accent-gold);
       position: relative;
       transition: all var(--transition);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
     .why-this-section:hover {
       background: linear-gradient(135deg, rgba(212,160,23,0.12), rgba(192,57,43,0.06));
@@ -362,32 +362,33 @@ MAIN_HTML = r"""<!DOCTYPE html>
       box-shadow: 0 2px 16px rgba(212,160,23,0.08);
     }
     .why-this-label {
-      font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
-      text-transform: uppercase; margin-bottom: 6px;
-      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 800; letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 8px;
     }
-    .why-this-label .icon { font-size: 13px; }
+    .why-this-label .icon { font-size: 14px; }
     .why-this-label .label-text {
-      background: linear-gradient(90deg, var(--accent-gold), var(--accent-gold-light));
+      background: linear-gradient(90deg, var(--accent-gold), #FFF);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       background-clip: text;
     }
     .why-this-text {
-      font-size: 14px; color: var(--text-secondary); line-height: 1.7;
-      font-weight: 400;
+      font-size: 15px; color: #E5E5EA; line-height: 1.6;
+      font-weight: 400; letter-spacing: 0.2px;
     }
 
     /* ── Listeners Said Section (Enhanced) ── */
     .listeners-section {
-      margin-top: 10px; padding: 14px 18px;
-      background: linear-gradient(135deg, rgba(192,57,43,0.06), rgba(92,58,30,0.08));
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: var(--radius-md);
-      border: 1px solid rgba(192,57,43,0.1);
-      border-left: 3px solid var(--accent-red);
+      margin-top: 12px; padding: 18px 24px;
+      background: linear-gradient(135deg, rgba(192,57,43,0.04), rgba(0,0,0,0.2));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 12px;
+      border: 1px solid rgba(192,57,43,0.15);
+      border-left: 4px solid var(--accent-red);
       position: relative;
       transition: all var(--transition);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
     .listeners-section:hover {
       background: linear-gradient(135deg, rgba(192,57,43,0.1), rgba(92,58,30,0.12));
@@ -395,22 +396,22 @@ MAIN_HTML = r"""<!DOCTYPE html>
       box-shadow: 0 2px 16px rgba(192,57,43,0.06);
     }
     .listeners-label {
-      font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
-      text-transform: uppercase; margin-bottom: 6px;
-      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 800; letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 8px;
     }
-    .listeners-label .icon { font-size: 13px; }
+    .listeners-label .icon { font-size: 14px; }
     .listeners-label .label-text {
-      background: linear-gradient(90deg, var(--accent-red), var(--accent-red-bright));
+      background: linear-gradient(90deg, var(--accent-red-bright), #FFF);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       background-clip: text;
     }
     .listeners-text {
-      font-size: 13px; color: var(--text-secondary);
+      font-size: 14px; color: #D1D1D6;
       font-style: italic; line-height: 1.6;
-      padding-left: 12px;
-      border-left: 2px solid rgba(192,57,43,0.15);
-      margin-left: 2px;
+      padding-left: 16px;
+      border-left: 2px solid rgba(192,57,43,0.3);
+      margin-left: 2px; letter-spacing: 0.2px;
     }
     .listeners-source {
       font-size: 11px; color: var(--text-subdued); margin-top: 6px;
