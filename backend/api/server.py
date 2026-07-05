@@ -70,6 +70,334 @@ def repair(req: RepairRequest) -> dict[str, Any]:
 
 # ── Main page ────────────────────────────────────────────────────
 
+RDE_HTML = r"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Review Discovery Engine</title>
+  <style>
+    :root {
+      --bg-dark: #0c0604;
+      --bg-card: rgba(40, 22, 12, 0.4);
+      --text-primary: #fcf8f2;
+      --text-secondary: #dcd0c0;
+      --text-subdued: #a39178;
+      --accent-gold: #d4a017;
+      --accent-gold-light: #f5d76e;
+      --accent-red: #8B0000;
+      --accent-red-bright: #c0392b;
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --radius-xl: 24px;
+      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body {
+      margin: 0; padding: 0;
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(139, 0, 0, 0.08), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(212, 160, 23, 0.05), transparent 25%);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    .rde-header {
+      position: sticky; top: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px;
+      background: rgba(12, 6, 4, 0.85);
+      backdrop-filter: blur(40px);
+      border-bottom: 1px solid rgba(212,160,23,0.1);
+    }
+    .rde-title {
+      font-size: 22px; font-weight: 800;
+      background: linear-gradient(90deg, var(--accent-red-bright), var(--accent-gold), var(--accent-gold-light));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .btn-back {
+      padding: 10px 22px; border-radius: var(--radius-xl);
+      border: 1px solid rgba(212,160,23,0.15);
+      background: rgba(92,58,30,0.1);
+      backdrop-filter: blur(12px);
+      color: var(--text-secondary);
+      font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+      text-decoration: none; display: inline-block;
+      transition: all var(--transition);
+    }
+    .btn-back:hover {
+      color: var(--text-primary);
+      border-color: rgba(212,160,23,0.3);
+      background: rgba(92,58,30,0.2);
+    }
+    .rde-body {
+      max-width: 900px; width: 100%; margin: 0 auto;
+      padding: 36px 24px 80px;
+    }
+    .rde-subtitle {
+      text-align: center; font-size: 14px; color: var(--text-subdued);
+      margin-bottom: 32px;
+    }
+
+    .rde-workflow {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 60px 20px;
+      text-align: center;
+    }
+    .rde-workflow.hidden { display: none; }
+    .btn-run-workflow {
+      padding: 18px 44px; border-radius: var(--radius-xl); border: none;
+      background: linear-gradient(135deg, var(--accent-red), var(--accent-gold));
+      color: #fff; font-family: inherit; font-size: 16px; font-weight: 800;
+      cursor: pointer; transition: all var(--transition);
+      box-shadow: 0 6px 24px rgba(192,57,43,0.3);
+      letter-spacing: 0.5px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .btn-run-workflow:hover {
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 8px 32px rgba(192,57,43,0.45);
+    }
+    .btn-run-workflow.hidden { display: none; }
+
+    .workflow-spinner-area {
+      display: none; flex-direction: column; align-items: center; gap: 24px;
+    }
+    .workflow-spinner-area.visible { display: flex; }
+    .workflow-spinner {
+      width: 56px; height: 56px; border-radius: 50%;
+      border: 4px solid rgba(212,160,23,0.15);
+      border-top: 4px solid var(--accent-gold);
+      animation: spinRotate 1s linear infinite;
+    }
+    @keyframes spinRotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .workflow-message {
+      font-size: 16px; font-weight: 600; color: var(--accent-gold);
+    }
+    .workflow-success {
+      display: none; flex-direction: column; align-items: center; gap: 16px;
+    }
+    .workflow-success.visible { display: flex; }
+    .workflow-success-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: linear-gradient(135deg, rgba(46,204,113,0.15), rgba(46,204,113,0.05));
+      border: 2px solid rgba(46,204,113,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+    }
+    .workflow-success-text {
+      font-size: 18px; font-weight: 700; color: #2ecc71;
+    }
+
+    .rde-controls {
+      display: flex; gap: 12px; flex-wrap: wrap;
+      align-items: center; justify-content: center; margin-bottom: 16px;
+    }
+    .rde-controls select {
+      flex: 1; min-width: 260px; max-width: 420px;
+      padding: 12px 16px; border-radius: var(--radius-md);
+      border: 1px solid rgba(212,160,23,0.2);
+      background: rgba(40, 22, 12, 0.6);
+      color: var(--text-primary);
+      font-family: inherit; font-size: 14px;
+    }
+    .rde-controls select:focus { outline: none; border-color: var(--accent-gold); }
+    .btn-analyze {
+      padding: 12px 28px; border-radius: var(--radius-md); border: none;
+      background: linear-gradient(135deg, var(--accent-red), var(--accent-gold));
+      color: #fff; font-family: inherit; font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: all var(--transition);
+      box-shadow: 0 4px 16px rgba(192,57,43,0.2);
+    }
+    .btn-analyze:hover {
+      transform: translateY(-2px) scale(1.03);
+    }
+
+    .rde-status {
+      text-align: center; font-size: 14px; color: var(--accent-gold);
+      margin: 18px 0; min-height: 22px;
+    }
+    .rde-answer {
+      background: rgba(40, 22, 12, 0.5);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(212,160,23,0.12);
+      overflow: hidden; display: none;
+    }
+    .rde-answer.visible { display: block; }
+    .rde-answer-header {
+      padding: 16px 24px; font-weight: 700; font-size: 15px;
+      border-bottom: 1px solid rgba(212,160,23,0.08);
+      background: linear-gradient(90deg, var(--accent-gold), var(--accent-red-bright));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .rde-answer-body {
+      padding: 24px; line-height: 1.75; font-size: 14px; color: var(--text-secondary);
+    }
+    .rde-answer-body h2 {
+      font-size: 17px; font-weight: 700;
+      margin: 24px 0 10px; padding-bottom: 6px;
+      border-bottom: 1px solid rgba(212,160,23,0.1);
+      color: var(--accent-gold);
+    }
+    .rde-answer-body h2:first-child { margin-top: 0; }
+    .rde-answer-body h3 {
+      font-size: 14px; font-weight: 600; color: var(--accent-gold);
+      margin: 16px 0 6px;
+    }
+    .rde-answer-body blockquote {
+      border-left: 3px solid var(--accent-gold);
+      padding: 10px 18px; margin: 10px 0;
+      background: rgba(212,160,23,0.04);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-style: italic; color: var(--text-secondary);
+    }
+
+    .dot-pulse { display: inline-flex; gap: 5px; vertical-align: middle; margin-right: 8px;}
+    .dot-pulse span {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-red), var(--accent-gold));
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    .dot-pulse span:nth-child(2) { animation-delay: 0.2s; }
+    .dot-pulse span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse {
+      0%,100% { opacity: 0.2; transform: scale(0.7); }
+      50% { opacity: 1; transform: scale(1.3); }
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(212,160,23,0.15); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(212,160,23,0.3); }
+  </style>
+</head>
+<body>
+  <div class="rde-header">
+    <div class="rde-title">Review Discovery Engine</div>
+    <a href="/" class="btn-back">← Back to Spotify</a>
+  </div>
+  <div class="rde-body">
+    <div class="rde-subtitle">RAG-powered insights from 100 Spotify user reviews - Google Play & App Store</div>
+
+    <!-- Workflow Section -->
+    <div class="rde-workflow" id="rdeWorkflow">
+      <button class="btn-run-workflow" id="btnRunWorkflow" onclick="runWorkflow()">🚀 Run Workflow to Scrape Reviews</button>
+      <div class="workflow-spinner-area" id="workflowSpinner">
+        <div class="workflow-spinner"></div>
+        <div class="workflow-message">Running scrapper to fetch reviews…</div>
+      </div>
+      <div class="workflow-success" id="workflowSuccess">
+        <div class="workflow-success-icon">✓</div>
+        <div class="workflow-success-text">Fetched reviews</div>
+      </div>
+    </div>
+
+    <!-- Query Controls -->
+    <div class="rde-controls hidden" id="rdeControls" style="display: none;">
+      <select id="rdeSelect"></select>
+      <button class="btn-analyze" onclick="analyzeRDE()">Analyze</button>
+    </div>
+
+    <div class="rde-status" id="rdeStatus"></div>
+    <div class="rde-answer" id="rdeAnswer">
+      <div class="rde-answer-header" id="rdeAnswerHeader"></div>
+      <div class="rde-answer-body" id="rdeAnswerBody"></div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      loadRDEQuestions();
+    });
+
+    function runWorkflow() {
+      const btn = document.getElementById('btnRunWorkflow');
+      const spinner = document.getElementById('workflowSpinner');
+      const success = document.getElementById('workflowSuccess');
+      const controls = document.getElementById('rdeControls');
+      const workflow = document.getElementById('rdeWorkflow');
+
+      btn.classList.add('hidden');
+      spinner.classList.add('visible');
+
+      setTimeout(() => {
+        spinner.classList.remove('visible');
+        success.classList.add('visible');
+
+        setTimeout(() => {
+          workflow.classList.add('hidden');
+          controls.style.display = 'flex';
+        }, 1500);
+      }, 10000);
+    }
+
+    async function loadRDEQuestions() {
+      try {
+        const resp = await fetch('/api/questions');
+        const questions = await resp.json();
+        const sel = document.getElementById('rdeSelect');
+        sel.innerHTML = questions.map(q => `<option value="${q.key}">${q.title}</option>`).join('');
+      } catch (e) { console.error('Failed to load questions', e); }
+    }
+
+    function mdToHtml(md) {
+      let html = md;
+      html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+      html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+      html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+      html = html.replace(/^  (\d+)\. "(.+)"$/gm, '<blockquote><strong>[$1]</strong> "$2"</blockquote>');
+      html = html.replace(/^  [•] (.+)$/gm, '<li>$1</li>');
+      html = html.replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>');
+      const lines = html.split('\n');
+      let result = [];
+      for (let line of lines) {
+        const trimmed = line.trim();
+        if (trimmed === '') result.push('');
+        else if (trimmed.startsWith('<')) result.push(trimmed);
+        else result.push('<p>' + trimmed + '</p>');
+      }
+      return result.join('\n');
+    }
+
+    async function analyzeRDE() {
+      const status = document.getElementById('rdeStatus');
+      const answerBox = document.getElementById('rdeAnswer');
+      const header = document.getElementById('rdeAnswerHeader');
+      const body = document.getElementById('rdeAnswerBody');
+
+      answerBox.classList.remove('visible');
+      status.innerHTML = '<div class="dot-pulse"><span></span><span></span><span></span></div> Running RAG analysis…';
+
+      const qKey = document.getElementById('rdeSelect').value;
+      const payload = { question_key: qKey };
+
+      try {
+        const resp = await fetch('/api/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await resp.json();
+        status.innerHTML = `✅ Analysis complete - <strong>${data.evidence_count} evidence documents</strong> retrieved`;
+        header.textContent = data.question;
+        body.innerHTML = mdToHtml(data.answer);
+        answerBox.classList.add('visible');
+      } catch (e) {
+        status.innerHTML = '❌ Analysis failed';
+      }
+    }
+  </script>
+</body>
+</html>"""
+
+
 MAIN_HTML = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -608,196 +936,6 @@ MAIN_HTML = r"""<!DOCTYPE html>
       background-clip: text;
     }
 
-    /* ── RDE Overlay ─────────────────────── */
-    .rde-overlay {
-      position: fixed; inset: 0; z-index: 150;
-      background: rgba(12, 6, 4, 0.92);
-      backdrop-filter: blur(30px) saturate(180%);
-      -webkit-backdrop-filter: blur(30px) saturate(180%);
-      display: flex; flex-direction: column;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.4s;
-      overflow-y: auto;
-    }
-    .rde-overlay.visible { opacity: 1; pointer-events: all; }
-    .rde-header {
-      position: sticky; top: 0; z-index: 10;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 32px;
-      background: rgba(12, 6, 4, 0.85);
-      backdrop-filter: blur(40px);
-      -webkit-backdrop-filter: blur(40px);
-      border-bottom: 1px solid rgba(212,160,23,0.1);
-    }
-    .rde-title {
-      font-size: 22px; font-weight: 800;
-      background: linear-gradient(90deg, var(--accent-red-bright), var(--accent-gold), var(--accent-gold-light));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    }
-    .btn-back {
-      padding: 10px 22px; border-radius: var(--radius-xl);
-      border: 1px solid rgba(212,160,23,0.15);
-      background: rgba(92,58,30,0.1);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      color: var(--text-secondary);
-      font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
-      transition: all var(--transition);
-    }
-    .btn-back:hover {
-      color: var(--text-primary);
-      border-color: rgba(212,160,23,0.3);
-      background: rgba(92,58,30,0.2);
-    }
-    .rde-body {
-      max-width: 900px; width: 100%; margin: 0 auto;
-      padding: 36px 24px 80px;
-    }
-    .rde-subtitle {
-      text-align: center; font-size: 14px; color: var(--text-subdued);
-      margin-bottom: 32px;
-    }
-
-    /* ── RDE Workflow Section ─────────────── */
-    .rde-workflow {
-      display: flex; flex-direction: column; align-items: center;
-      justify-content: center; padding: 60px 20px;
-      text-align: center;
-    }
-    .rde-workflow.hidden { display: none; }
-    .btn-run-workflow {
-      padding: 18px 44px; border-radius: var(--radius-xl); border: none;
-      background: linear-gradient(135deg, var(--accent-red), var(--accent-gold));
-      color: #fff; font-family: inherit; font-size: 16px; font-weight: 800;
-      cursor: pointer; transition: all var(--transition);
-      box-shadow: 0 6px 24px rgba(192,57,43,0.3);
-      letter-spacing: 0.5px;
-      display: flex; align-items: center; gap: 10px;
-    }
-    .btn-run-workflow:hover {
-      transform: translateY(-3px) scale(1.04);
-      box-shadow: 0 8px 32px rgba(192,57,43,0.45);
-    }
-    .btn-run-workflow:active { transform: translateY(0) scale(0.97); }
-    .btn-run-workflow.hidden { display: none; }
-
-    .workflow-spinner-area {
-      display: none; flex-direction: column; align-items: center; gap: 24px;
-    }
-    .workflow-spinner-area.visible { display: flex; }
-    .workflow-spinner {
-      width: 56px; height: 56px; border-radius: 50%;
-      border: 4px solid rgba(212,160,23,0.15);
-      border-top: 4px solid var(--accent-gold);
-      animation: spinRotate 1s linear infinite;
-    }
-    @keyframes spinRotate {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .workflow-message {
-      font-size: 16px; font-weight: 600; color: var(--accent-gold);
-      letter-spacing: 0.3px;
-    }
-    .workflow-success {
-      display: none; flex-direction: column; align-items: center; gap: 16px;
-      animation: fadeSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .workflow-success.visible { display: flex; }
-    .workflow-success-icon {
-      width: 64px; height: 64px; border-radius: 50%;
-      background: linear-gradient(135deg, rgba(46,204,113,0.15), rgba(46,204,113,0.05));
-      border: 2px solid rgba(46,204,113,0.4);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 28px;
-    }
-    .workflow-success-text {
-      font-size: 18px; font-weight: 700;
-      color: #2ecc71;
-    }
-
-    .rde-controls {
-      display: none; gap: 12px; flex-wrap: wrap;
-      align-items: center; justify-content: center; margin-bottom: 16px;
-    }
-    .rde-controls.visible {
-      display: flex;
-      animation: fadeSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .rde-controls select {
-      flex: 1; min-width: 260px; max-width: 420px;
-      padding: 12px 16px; border-radius: var(--radius-md);
-      border: 1px solid rgba(212,160,23,0.2);
-      background: rgba(40, 22, 12, 0.6);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      color: var(--text-primary);
-      font-family: inherit; font-size: 14px;
-    }
-    .rde-controls select:focus { outline: none; border-color: var(--accent-gold); }
-    .btn-analyze {
-      padding: 12px 28px; border-radius: var(--radius-md); border: none;
-      background: linear-gradient(135deg, var(--accent-red), var(--accent-gold));
-      color: #fff; font-family: inherit; font-size: 14px; font-weight: 700;
-      cursor: pointer; transition: all var(--transition);
-      box-shadow: 0 4px 16px rgba(192,57,43,0.2);
-      letter-spacing: 0.3px;
-    }
-    .btn-analyze:hover {
-      transform: translateY(-2px) scale(1.03);
-      box-shadow: 0 6px 24px rgba(192,57,43,0.35);
-    }
-
-    .rde-status {
-      text-align: center; font-size: 14px; color: var(--accent-gold);
-      margin: 18px 0; min-height: 22px;
-    }
-    .rde-answer {
-      background: rgba(40, 22, 12, 0.5);
-      backdrop-filter: blur(30px);
-      -webkit-backdrop-filter: blur(30px);
-      border-radius: var(--radius-lg);
-      border: 1px solid rgba(212,160,23,0.12);
-      overflow: hidden; display: none;
-      animation: fadeSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: var(--shadow-glass);
-    }
-    .rde-answer.visible { display: block; }
-    .rde-answer-header {
-      padding: 16px 24px; font-weight: 700; font-size: 15px;
-      background: linear-gradient(90deg, rgba(192,57,43,0.08), rgba(212,160,23,0.06));
-      border-bottom: 1px solid rgba(212,160,23,0.08);
-      background: linear-gradient(90deg, var(--accent-gold), var(--accent-red-bright));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .rde-answer-body {
-      padding: 24px; line-height: 1.75; font-size: 14px; color: var(--text-secondary);
-    }
-    .rde-answer-body h2 {
-      font-size: 17px; font-weight: 700;
-      margin: 24px 0 10px; padding-bottom: 6px;
-      border-bottom: 1px solid rgba(212,160,23,0.1);
-      background: linear-gradient(90deg, var(--accent-gold), var(--accent-gold-light));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .rde-answer-body h2:first-child { margin-top: 0; }
-    .rde-answer-body h3 {
-      font-size: 14px; font-weight: 600; color: var(--accent-brown-warm);
-      margin: 16px 0 6px;
-    }
-    .rde-answer-body p { margin: 6px 0 12px; }
-    .rde-answer-body ul { padding-left: 20px; margin: 6px 0 12px; }
-    .rde-answer-body li { margin-bottom: 6px; }
-    .rde-answer-body blockquote {
-      border-left: 3px solid var(--accent-gold);
-      padding: 10px 18px; margin: 10px 0;
-      background: rgba(212,160,23,0.04);
-      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-      font-style: italic; color: var(--text-secondary);
-    }
-
     /* ── Loading ──────────────────────────── */
     .loading-bar {
       display: flex; align-items: center; justify-content: center;
@@ -852,7 +990,7 @@ MAIN_HTML = r"""<!DOCTYPE html>
     <div class="header-actions">
       <span class="stats-pill" id="statsPill">100 reviews · 2 sources</span>
       <button class="btn-rde" id="showAiRationale" onclick="showAIModal()" style="margin-right: 12px; background: rgba(192, 57, 43, 0.1); border-color: rgba(192, 57, 43, 0.3); color: var(--accent-red-bright);">✨ Why AI?</button>
-      <button class="btn-rde" id="openRDE" onclick="showRDE()">Discovery Engine</button>
+      <a href="/workflow" target="_blank" class="btn-rde" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">Discovery Engine</a>
     </div>
   </header>
 
@@ -921,42 +1059,6 @@ MAIN_HTML = r"""<!DOCTYPE html>
     </div>
   </div>
 
-  <!-- ─── RDE Overlay ────────────────────────────── -->
-  <div class="rde-overlay" id="rdeOverlay">
-    <div class="rde-header">
-      <div class="rde-title">Review Discovery Engine</div>
-      <button class="btn-back" onclick="hideRDE()">← Back to Spotify</button>
-    </div>
-    <div class="rde-body">
-      <div class="rde-subtitle">RAG-powered insights from 100 Spotify user reviews - Google Play &amp; App Store</div>
-
-      <!-- Workflow Section -->
-      <div class="rde-workflow" id="rdeWorkflow">
-        <button class="btn-run-workflow" id="btnRunWorkflow" onclick="runWorkflow()">🚀 Run Workflow to Scrape Reviews</button>
-        <div class="workflow-spinner-area" id="workflowSpinner">
-          <div class="workflow-spinner"></div>
-          <div class="workflow-message">Running scrapper to fetch reviews…</div>
-        </div>
-        <div class="workflow-success" id="workflowSuccess">
-          <div class="workflow-success-icon">✓</div>
-          <div class="workflow-success-text">Fetched reviews</div>
-        </div>
-      </div>
-
-      <!-- Query Controls (hidden until workflow completes) -->
-      <div class="rde-controls" id="rdeControls">
-        <select id="rdeSelect"></select>
-        <button class="btn-analyze" onclick="analyzeRDE()">Analyze</button>
-      </div>
-
-      <div class="rde-status" id="rdeStatus"></div>
-      <div class="rde-answer" id="rdeAnswer">
-        <div class="rde-answer-header" id="rdeAnswerHeader"></div>
-        <div class="rde-answer-body" id="rdeAnswerBody"></div>
-      </div>
-    </div>
-  </div>
-
   <!-- ─── JavaScript ─────────────────────────────── -->
   <script>
     // ── State ──────────────────────────────
@@ -972,7 +1074,6 @@ MAIN_HTML = r"""<!DOCTYPE html>
     // ── Init ───────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
       loadTracks();
-      loadRDEQuestions();
     });
 
     // ── Track Loading ──────────────────────
@@ -1130,107 +1231,6 @@ MAIN_HTML = r"""<!DOCTYPE html>
       repairDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
-    // ── RDE View ───────────────────────────
-    function showRDE() {
-      document.getElementById('rdeOverlay').classList.add('visible');
-      // Reset workflow state each time the overlay opens
-      if (!state.workflowDone) {
-        document.getElementById('rdeWorkflow').classList.remove('hidden');
-        document.getElementById('btnRunWorkflow').classList.remove('hidden');
-        document.getElementById('workflowSpinner').classList.remove('visible');
-        document.getElementById('workflowSuccess').classList.remove('visible');
-        document.getElementById('rdeControls').classList.remove('visible');
-        document.getElementById('rdeStatus').innerHTML = '';
-        document.getElementById('rdeAnswer').classList.remove('visible');
-      }
-    }
-    function hideRDE() { document.getElementById('rdeOverlay').classList.remove('visible'); }
-
-    // ── Workflow ───────────────────────────
-    function runWorkflow() {
-      const btn = document.getElementById('btnRunWorkflow');
-      const spinner = document.getElementById('workflowSpinner');
-      const success = document.getElementById('workflowSuccess');
-      const controls = document.getElementById('rdeControls');
-      const workflow = document.getElementById('rdeWorkflow');
-
-      // Hide button, show spinner
-      btn.classList.add('hidden');
-      spinner.classList.add('visible');
-
-      // After 10 seconds, show success and then reveal queries
-      setTimeout(() => {
-        spinner.classList.remove('visible');
-        success.classList.add('visible');
-
-        // After a brief pause to read the success message, show the queries
-        setTimeout(() => {
-          workflow.classList.add('hidden');
-          controls.classList.add('visible');
-          state.workflowDone = true;
-        }, 1500);
-      }, 10000);
-    }
-
-    async function loadRDEQuestions() {
-      try {
-        const resp = await fetch('/api/questions');
-        const questions = await resp.json();
-        const sel = document.getElementById('rdeSelect');
-        sel.innerHTML = questions.map(q => `<option value="${q.key}">${q.title}</option>`).join('');
-      } catch (e) { console.error('Failed to load questions', e); }
-    }
-
-    function mdToHtml(md) {
-      let html = md;
-      html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
-      html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
-      html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-      html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-      html = html.replace(/^  (\d+)\. "(.+)"$/gm, '<blockquote><strong>[$1]</strong> "$2"</blockquote>');
-      html = html.replace(/^  [•] (.+)$/gm, '<li>$1</li>');
-      html = html.replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>');
-      const lines = html.split('\n');
-      let result = [];
-      for (let line of lines) {
-        const trimmed = line.trim();
-        if (trimmed === '') result.push('');
-        else if (trimmed.startsWith('<')) result.push(trimmed);
-        else result.push('<p>' + trimmed + '</p>');
-      }
-      return result.join('\n');
-    }
-
-    async function analyzeRDE() {
-      const status = document.getElementById('rdeStatus');
-      const answerBox = document.getElementById('rdeAnswer');
-      const header = document.getElementById('rdeAnswerHeader');
-      const body = document.getElementById('rdeAnswerBody');
-
-      answerBox.classList.remove('visible');
-      status.innerHTML = '<div class="dot-pulse" style="display:inline-flex;vertical-align:middle;margin-right:8px;"><span></span><span></span><span></span></div> Running RAG analysis…';
-
-      const qKey = document.getElementById('rdeSelect').value;
-
-      const payload = { question_key: qKey };
-
-      try {
-        const resp = await fetch('/api/ask', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        const data = await resp.json();
-        status.innerHTML = `✅ Analysis complete - <strong>${data.evidence_count} evidence documents</strong> retrieved`;
-        header.textContent = data.question;
-        body.innerHTML = mdToHtml(data.answer);
-        answerBox.classList.add('visible');
-      } catch (e) {
-        status.innerHTML = '❌ Analysis failed';
-      }
-    }
-
     // Enter key support
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
@@ -1240,7 +1240,6 @@ MAIN_HTML = r"""<!DOCTYPE html>
       }
       if (e.key === 'Escape') {
         dismissRepair();
-        hideRDE();
       }
     });
     /* ─── AI Modal Logic ────────────── */
@@ -1255,6 +1254,12 @@ MAIN_HTML = r"""<!DOCTYPE html>
 </html>"""
 
 
+
+@app.get("/workflow", response_class=HTMLResponse)
+def rde_workflow():
+    return RDE_HTML
+
 @app.get("/", response_class=HTMLResponse)
+
 def index():
     return MAIN_HTML
