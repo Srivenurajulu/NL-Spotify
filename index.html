@@ -680,7 +680,7 @@
     
     // STATIC OVERRIDE FOR GITHUB PAGES
     const STATIC_TRACKS = [{"id": "track_1", "title": "Blinding Lights", "artist": "The Weeknd", "genre": "Synth-Pop", "duration": "3:20", "mood_tags": ["upbeat", "energetic", "driving"], "tempo": "fast", "energy": "high", "has_lyrics": true, "year": 2019, "album": "After Hours", "anchor_artist": "Daft Punk", "art_colors": ["#8b0000", "#ff0000", "#1a1a1a"], "why_this": "High-BPM synth-pop that channels Daft Punk's retro-futurism - perfect for listeners seeking an immediate, driving rhythm.", "listener_quote": {"text": "Just tell me WHY you picked something - 'because this artist collaborated with someone you saved last week' would be enough.", "source": "User Interview \u00b7 Srivatsan (Frustrated Discoverer)"}, "context_used": "default"}, {"id": "track_2", "title": "Cornfield Chase", "artist": "Hans Zimmer", "genre": "Soundtrack", "duration": "2:06", "mood_tags": ["cinematic", "instrumental", "focus"], "tempo": "moderate", "energy": "medium", "has_lyrics": false, "year": 2014, "album": "Interstellar (Original Motion Picture Soundtrack)", "anchor_artist": "Ludovico Einaudi", "art_colors": ["#d4a373", "#faedcd", "#fefae0"], "why_this": "Cinematic and purely instrumental - Hans Zimmer's intricate organ arrangement provides a deep, immersive listening experience.", "listener_quote": {"text": "The algorithm doesn't understand that my taste shifts based on context: gym music is completely different from my commute playlist.", "source": "User Interview \u00b7 Syed (Churned Discoverer)"}, "context_used": "default"}, {"id": "track_3", "title": "Pink + White", "artist": "Frank Ocean", "genre": "R&B / Soul", "duration": "3:04", "mood_tags": ["chill", "mellow", "evening"], "tempo": "slow", "energy": "medium", "has_lyrics": true, "year": 2016, "album": "Blonde", "anchor_artist": "Daniel Caesar", "art_colors": ["#4a7c59", "#c8d5b9", "#faf3dd"], "why_this": "Lush, string-heavy R&B that strips away heavy beats in favor of Frank Ocean's distinct vocal texture and Daniel Caesar-like warmth.", "listener_quote": {"text": "When it misses, it misses badly, and there's no way to say 'not this mood right now' without skipping.", "source": "User Interview \u00b7 Sakthi (Satisfied but curious)"}, "context_used": "default"}, {"id": "track_4", "title": "Glimpse of Us", "artist": "Joji", "genre": "Pop Ballad", "duration": "3:53", "mood_tags": ["sad", "piano", "emotional"], "tempo": "slow", "energy": "low", "has_lyrics": true, "year": 2022, "album": "SMITHEREENS", "anchor_artist": "Rex Orange County", "art_colors": ["#2b2d42", "#8d99ae", "#edf2f4"], "why_this": "A raw, piano-driven ballad that leans entirely into emotional resonance rather than production tricks, reminiscent of early Rex Orange County.", "listener_quote": {"text": "On a Sunday evening when I'm winding down, I don't want the high-energy workout music that I listened to that morning.", "source": "User Interview \u00b7 Arun (Context-Seeking Discoverer)"}, "context_used": "default"}, {"id": "track_5", "title": "L$D", "artist": "A$AP Rocky", "genre": "Psychedelic Hip-Hop", "duration": "3:58", "mood_tags": ["psychedelic", "late-night", "ambient"], "tempo": "slow", "energy": "low", "has_lyrics": true, "year": 2015, "album": "AT.LONG.LAST.A$AP", "anchor_artist": "Kid Cudi", "art_colors": ["#5a189a", "#7b2cbf", "#9d4edd"], "why_this": "Psychedelic, atmospheric hip-hop that prioritizes trippy textures and a slow, hypnotic groove over traditional rap cadences.", "listener_quote": {"text": "One bad week undoes three good ones in my head... it feels like shouting into a void when I skip something.", "source": "User Interview \u00b7 Gourav (Inconsistency-Frustrated)"}, "context_used": "default"}];
-    const STATIC_REPAIR = {"id": "mock_repair_1", "name": "Adjusted Track (Mock)", "artist": "Static AI", "album_art": "https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228", "why_this": "Because you asked for an adjustment, we switched to a different vibe (Static Demo).", "listeners_said": "This was the perfect course correction.", "listener_source": "App Store Review"};
+    const STATIC_REPAIR = {"id": "mock_repair_1", "name": "Adjusted Track (Mock)", "title": "Adjusted Track (Mock)", "artist": "Static AI", "genre": "Adjusted Vibe", "duration": "3:00", "album": "Mock Album", "year": 2024, "art_colors": ["#5c3a1e", "#c0392b", "#d4a017"], "why_this": "Because you asked for an adjustment, we switched to a different vibe (Static Demo).", "listener_quote": {"text": "This was the perfect course correction.", "source": "App Store Review"}, "listeners_said": "This was the perfect course correction.", "listener_source": "App Store Review"};
 
     async function loadTracks() {
       const list = document.getElementById('trackList');
@@ -694,6 +694,63 @@
         document.getElementById('trackCount').textContent = state.tracks.length + ' Tracks';
         renderTracks(state.tracks);
       }, 500);
+    }
+    
+function renderTracks(tracks) {
+      const list = document.getElementById('trackList');
+      list.innerHTML = '';
+      tracks.forEach((t, idx) => {
+        const card = document.createElement('div');
+        card.className = 'track-card';
+        card.id = `card-${t.id}`;
+        card.style.animationDelay = `${idx * 0.1}s`;
+        if (state.savedIds.includes(t.id)) card.classList.add('saved');
+        if (state.skippedIds.includes(t.id)) card.classList.add('skipped');
+        if (state.playingId === t.id) card.classList.add('playing');
+
+        const colors = t.art_colors || ['#5c3a1e','#c0392b','#d4a017'];
+        const initial = t.title.charAt(0).toUpperCase();
+
+        card.innerHTML = `
+          <div class="track-art" style="background: linear-gradient(135deg, ${colors[0]}, ${colors[1]}, ${colors[2]});">
+            <div class="track-art-inner">${initial}</div>
+          </div>
+          <div class="track-info">
+            <div class="track-title-row">
+              <div class="track-title">${t.title}</div>
+              <span class="track-artist">- ${t.artist}</span>
+            </div>
+            <div class="track-meta">${t.genre} <span class="dot"></span> ${t.duration} <span class="dot"></span> ${t.album} (${t.year})</div>
+            <div class="why-this-section">
+              <div class="why-this-label"><span class="icon">✦</span> <span class="label-text">WHY THIS</span></div>
+              <div class="why-this-text">${t.why_this}</div>
+            </div>
+            <div class="listeners-section">
+              <div class="listeners-label"><span class="icon">💬</span> <span class="label-text">LISTENERS SAID</span></div>
+              <div class="listeners-text">"${t.listener_quote.text}"</div>
+              <div class="listeners-source"><span class="src-icon">📍</span> ${t.listener_quote.source}</div>
+            </div>
+            <div class="track-actions">
+              <button class="btn-play" onclick="playTrack('${t.id}')">▶ Play</button>
+              <button class="btn-save" onclick="saveTrack('${t.id}')">♡ Save</button>
+              <button class="btn-skip" onclick="skipTrack('${t.id}')">✕ Skip</button>
+            </div>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    // ── Track Actions ──────────────────────
+    function playTrack(id) {
+      state.consecutiveSkips = 0;
+      state.playingId = id;
+      renderTracks(state.tracks);
+    }
+
+    function saveTrack(id) {
+      if (!state.savedIds.includes(id)) state.savedIds.push(id);
+      renderTracks(state.tracks);
     }
 
     function skipTrack(id) {
@@ -720,7 +777,58 @@
       state.consecutiveSkips = 0;
     }
 
+    
+    async function submitRepair() {
+      const feedback = document.getElementById('repairInput').value.trim();
+      if (!feedback) return;
+      document.getElementById('repairModal').classList.remove('visible');
 
+      const data = {
+         track: STATIC_REPAIR,
+         adjustment_note: "Adjusted based on feedback",
+         why_this: STATIC_REPAIR.why_this,
+         listener_quote: STATIC_REPAIR.listener_quote
+      };
+
+      state.consecutiveSkips = 0;
+
+      // Show the repair result as a special card
+      const list = document.getElementById('trackList');
+      const repairDiv = document.createElement('div');
+      repairDiv.className = 'repair-result';
+      const t = data.track;
+      const colors = t.art_colors || ['#5c3a1e','#c0392b','#d4a017'];
+      repairDiv.innerHTML = `
+        <div class="repair-note">🔄 ${data.adjustment_note}</div>
+        <div class="track-card" style="margin:0;border-color:rgba(212,160,23,0.3);">
+          <div class="track-art" style="background: linear-gradient(135deg, ${colors[0]}, ${colors[1]}, ${colors[2]});">
+            <div class="track-art-inner">${t.title.charAt(0)}</div>
+          </div>
+          <div class="track-info">
+            <div class="track-title-row">
+              <div class="track-title">${t.title}</div>
+              <span class="track-artist">- ${t.artist}</span>
+            </div>
+            <div class="track-meta">${t.genre} <span class="dot"></span> ${t.duration} <span class="dot"></span> ${t.album} (${t.year})</div>
+            <div class="why-this-section">
+              <div class="why-this-label"><span class="icon">✦</span> <span class="label-text">WHY THIS - ADJUSTED</span></div>
+              <div class="why-this-text">${data.why_this}</div>
+            </div>
+            <div class="listeners-section">
+              <div class="listeners-label"><span class="icon">💬</span> <span class="label-text">LISTENERS SAID</span></div>
+              <div class="listeners-text">"${data.listener_quote.text}"</div>
+              <div class="listeners-source"><span class="src-icon">📍</span> ${data.listener_quote.source}</div>
+            </div>
+            <div class="track-actions">
+              <button class="btn-play" onclick="playTrack('${t.id}')">▶ Play</button>
+              <button class="btn-save" onclick="saveTrack('${t.id}')">♡ Save</button>
+            </div>
+          </div>
+        </div>
+      `;
+      list.prepend(repairDiv);
+      repairDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 
     // Enter key support
     document.addEventListener('keydown', (e) => {
@@ -742,4 +850,15 @@
     }
   </script>
 </body>
-</html>
+</html>"""
+
+
+
+@app.get("/workflow", response_class=HTMLResponse)
+def rde_workflow():
+    return RDE_HTML
+
+@app.get("/", response_class=HTMLResponse)
+
+def index():
+    return MAIN_HTML
