@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Spotify - Discovery</title>
+  <meta name="description" content="AI-powered music discovery with explanations, proof, and repair - a premium Spotify experience.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg-primary: #1A0D08;
+      --bg-warm: #26130B;
+      --bg-card: rgba(40, 22, 12, 0.55);
+      --bg-card-hover: rgba(55, 30, 16, 0.65);
+      --bg-elevated: rgba(50, 28, 14, 0.8);
+      --bg-glass: rgba(60, 30, 15, 0.25);
+      --text-primary: #faf0e6;
+      --text-secondary: #c4a882;
+      --text-subdued: #7a5c3e;
+      --accent-red: #c0392b;
+      --accent-red-bright: #e74c3c;
+      --accent-red-glow: rgba(192, 57, 43, 0.35);
+      --accent-gold: #d4a017;
+      --accent-gold-light: #f0c040;
+      --accent-gold-warm: #c8922a;
+      --accent-gold-glow: rgba(212, 160, 23, 0.3);
+      --accent-brown: #5c3a1e;
+      --accent-brown-light: #8b5e3c;
+      --accent-brown-warm: #a0704a;
+      --border-glass: rgba(212, 160, 23, 0.12);
+      --border-warm: rgba(192, 57, 43, 0.15);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --shadow-glass: 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+      --shadow-glow-gold: 0 4px 30px rgba(212, 160, 23, 0.15);
+      --shadow-glow-red: 0 4px 30px rgba(192, 57, 43, 0.12);
+      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-spring: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      background: var(--bg-primary);
+      background-image:
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(220,38,38,0.12) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(212,160,23,0.1) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 50% at 10% 60%, rgba(139,69,19,0.15) 0%, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ── Liquid Glass Utility ──────────────── */
+    .glass {
+      background: var(--bg-glass);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      border: 1px solid var(--border-glass);
+      box-shadow: var(--shadow-glass);
+    }
+
+    /* ── Header ───────────────────────────── */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 32px;
+      background: rgba(12, 6, 4, 0.75);
+      backdrop-filter: blur(50px) saturate(200%);
+      -webkit-backdrop-filter: blur(50px) saturate(200%);
+      border-bottom: 1px solid rgba(212,160,23,0.08);
+    }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 24px; font-weight: 900; letter-spacing: -0.5px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-red), var(--accent-gold));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: #fff;
+      box-shadow: 0 2px 12px rgba(192,57,43,0.3);
+      animation: logoPulse 3s ease-in-out infinite;
+    }
+    @keyframes logoPulse {
+      0%,100% { box-shadow: 0 2px 12px rgba(192,57,43,0.3); }
+      50% { box-shadow: 0 2px 20px rgba(192,57,43,0.5), 0 0 40px rgba(212,160,23,0.15); }
+    }
+    .logo-text {
+      background: linear-gradient(135deg, var(--accent-red-bright), var(--accent-gold), var(--accent-gold-light));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      background-size: 200% 200%;
+      animation: gradientShift 4s ease-in-out infinite;
+    }
+    @keyframes gradientShift {
+      0%,100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .header-actions { display: flex; gap: 12px; align-items: center; }
+    .btn-rde {
+      padding: 10px 22px; border-radius: var(--radius-xl);
+      border: 1.5px solid var(--accent-gold-warm);
+      background: rgba(212,160,23,0.08);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      color: var(--accent-gold-light);
+      font-family: inherit; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all var(--transition); letter-spacing: 0.3px;
+    }
+    .btn-rde:hover {
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light));
+      color: #1a0c04; border-color: transparent;
+      box-shadow: var(--shadow-glow-gold);
+      transform: translateY(-1px);
+    }
+    .stats-pill {
+      font-size: 11px; color: var(--text-subdued);
+      padding: 6px 14px; border-radius: var(--radius-xl);
+      background: rgba(92,58,30,0.2);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(212,160,23,0.08);
+    }
+
+    /* ── Main Content ─────────────────────── */
+    main { max-width: 900px; margin: 0 auto; padding: 36px 24px 100px; }
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+    }
+    .section-header h1 {
+      font-size: 28px; font-weight: 800; letter-spacing: -0.5px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-header h1 .fire { font-size: 24px; }
+    .section-header h1 .count {
+      color: var(--text-subdued); font-weight: 400; font-size: 20px;
+    }
+    .context-bar {
+      display: flex; gap: 12px; align-items: center; margin-bottom: 32px; flex-wrap: wrap;
+    }
+    .context-bar input {
+      flex: 1; min-width: 220px; padding: 14px 22px;
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-glass);
+      background: rgba(40, 22, 12, 0.4);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      color: var(--text-primary);
+      font-family: inherit; font-size: 14px;
+      transition: all var(--transition);
+    }
+    .context-bar input:focus {
+      outline: none;
+      border-color: var(--accent-gold);
+      box-shadow: 0 0 0 3px rgba(212,160,23,0.12), var(--shadow-glow-gold);
+    }
+    .context-bar input::placeholder { color: var(--text-subdued); }
+    .btn-refresh {
+      padding: 14px 28px; border-radius: var(--radius-xl); border: none;
+      background: linear-gradient(135deg, var(--accent-red), var(--accent-red-bright));
+      color: #fff;
+      font-family: inherit; font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: all var(--transition);
+      box-shadow: 0 4px 16px rgba(192,57,43,0.25);
+      letter-spacing: 0.3px;
+    }
+    .btn-refresh:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 6px 24px rgba(192,57,43,0.4);
+    }
+    .btn-refresh:active { transform: translateY(0) scale(0.98); }
+
+    /* ── Track Cards ──────────────────────── */
+    .track-list { display: flex; flex-direction: column; gap: 20px; }
+    .track-card {
+      background: linear-gradient(160deg, rgba(60, 25, 15, 0.9), rgba(40, 15, 8, 0.95));
+      border-radius: var(--radius-lg); padding: 24px;
+      display: flex; gap: 24px; border: 1px solid rgba(212, 160, 23, 0.2);
+      transition: all var(--transition);
+      position: relative; overflow: hidden;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+    }
+    .track-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), rgba(212,160,23,0.3), transparent);
+    }
+    .track-card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(212,160,23,0.2);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-glass), var(--shadow-glow-gold);
+    }
+    .track-card.playing {
+      border-color: var(--accent-gold);
+      box-shadow: var(--shadow-glass), 0 0 40px rgba(212,160,23,0.2);
+    }
+    .track-card.playing::after {
+      content: '♪';
+      position: absolute; top: 12px; right: 16px;
+      font-size: 18px; color: var(--accent-gold);
+      animation: musicNote 1.5s ease-in-out infinite;
+    }
+    @keyframes musicNote {
+      0%,100% { opacity: 0.5; transform: translateY(0) rotate(0deg); }
+      50% { opacity: 1; transform: translateY(-4px) rotate(8deg); }
+    }
+    .track-card.saved .btn-save { color: var(--accent-gold) !important; border-color: var(--accent-gold) !important; }
+    .track-card.skipped { opacity: 0.25; pointer-events: none; filter: grayscale(0.6); }
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ── Track Art (Vinyl Style) ──────────── */
+    .track-art {
+      width: 120px; height: 120px; border-radius: 8px;
+      flex-shrink: 0; position: relative; overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.2);
+      border: 1px solid rgba(212, 160, 23, 0.3);
+    }
+    .track-art::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 50% 50%,
+        transparent 25%,
+        rgba(0,0,0,0.08) 26%,
+        transparent 27%,
+        transparent 49%,
+        rgba(0,0,0,0.06) 50%,
+        transparent 51%
+      );
+      border-radius: inherit;
+      pointer-events: none;
+    }
+    .track-art-inner {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; font-weight: 900;
+      color: rgba(255,255,255,0.85);
+      text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+      letter-spacing: -1px;
+    }
+    .track-info { flex: 1; min-width: 0; }
+    .track-title-row {
+      display: flex; align-items: baseline; gap: 10px;
+      margin-bottom: 4px;
+    }
+    .track-title {
+      font-size: 22px; font-weight: 800;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      letter-spacing: -0.5px; color: #ffffff;
+    }
+    .track-artist {
+      font-size: 16px; color: var(--accent-gold);
+      font-weight: 600; white-space: nowrap;
+    }
+    .track-meta {
+      font-size: 13px; color: #8E8E93; margin-top: 4px;
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 500;
+    }
+    .track-meta .dot { width: 4px; height: 4px; border-radius: 50%; background: #636366; display: inline-block; }
+
+    /* ── Why This Section (Gold/Brown) ──────── */
+    .why-this-section {
+      margin-top: 16px; padding: 18px 24px;
+      background: linear-gradient(135deg, rgba(212,160,23,0.15), rgba(92,30,10,0.4));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 12px;
+      border: 1px solid rgba(212,160,23,0.3);
+      border-left: 4px solid var(--accent-gold-light);
+      position: relative;
+      transition: all var(--transition);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .why-this-section:hover {
+      background: linear-gradient(135deg, rgba(212,160,23,0.12), rgba(192,57,43,0.06));
+      border-color: rgba(212,160,23,0.2);
+      box-shadow: 0 2px 16px rgba(212,160,23,0.08);
+    }
+    .why-this-label {
+      font-size: 11px; font-weight: 800; letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .why-this-label .icon { font-size: 14px; }
+    .why-this-label .label-text {
+      background: linear-gradient(90deg, var(--accent-gold), #FFF);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .why-this-text {
+      font-size: 15px; color: #E5E5EA; line-height: 1.6;
+      font-weight: 400; letter-spacing: 0.2px;
+    }
+
+    /* ── Listeners Said Section (Red/Brown) ── */
+    .listeners-section {
+      margin-top: 12px; padding: 18px 24px;
+      background: linear-gradient(135deg, rgba(220,38,38,0.12), rgba(92,10,10,0.3));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 12px;
+      border: 1px solid rgba(220,38,38,0.25);
+      border-left: 4px solid var(--accent-red-bright);
+      position: relative;
+      transition: all var(--transition);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .listeners-section:hover {
+      background: linear-gradient(135deg, rgba(192,57,43,0.1), rgba(92,58,30,0.12));
+      border-color: rgba(192,57,43,0.18);
+      box-shadow: 0 2px 16px rgba(192,57,43,0.06);
+    }
+    .listeners-label {
+      font-size: 11px; font-weight: 800; letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .listeners-label .icon { font-size: 14px; }
+    .listeners-label .label-text {
+      background: linear-gradient(90deg, var(--accent-red-bright), #FFF);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .listeners-text {
+      font-size: 14px; color: #D1D1D6;
+      font-style: italic; line-height: 1.6;
+      padding-left: 16px;
+      border-left: 2px solid rgba(192,57,43,0.3);
+      margin-left: 2px; letter-spacing: 0.2px;
+    }
+    .listeners-source {
+      font-size: 11px; color: var(--text-subdued); margin-top: 6px;
+      font-style: normal; font-weight: 500;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .listeners-source .src-icon { font-size: 10px; }
+
+    /* ── Action Buttons ──────────────────── */
+    .track-actions { display: flex; gap: 10px; margin-top: 16px; }
+    .track-actions button {
+      padding: 9px 22px; border-radius: var(--radius-xl); border: none;
+      font-family: inherit; font-size: 12px; font-weight: 700;
+      cursor: pointer; transition: all var(--transition);
+      display: flex; align-items: center; gap: 6px;
+      letter-spacing: 0.3px;
+    }
+    .btn-play {
+      background: linear-gradient(135deg, var(--accent-red), var(--accent-red-bright));
+      color: #fff;
+      box-shadow: 0 2px 12px rgba(192,57,43,0.2);
+    }
+    .btn-play:hover {
+      transform: translateY(-1px) scale(1.05);
+      box-shadow: 0 4px 20px rgba(192,57,43,0.35);
+    }
+    .btn-save {
+      background: rgba(212,160,23,0.08);
+      color: var(--text-secondary);
+      border: 1px solid rgba(212,160,23,0.15) !important;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .btn-save:hover {
+      color: var(--accent-gold-light);
+      border-color: var(--accent-gold) !important;
+      background: rgba(212,160,23,0.15);
+    }
+    .btn-skip {
+      background: rgba(92,58,30,0.1);
+      color: var(--text-subdued);
+      border: 1px solid rgba(92,58,30,0.2) !important;
+    }
+    .btn-skip:hover {
+      color: var(--accent-red-bright);
+      border-color: var(--accent-red) !important;
+      background: rgba(192,57,43,0.08);
+    }
+
+    /* ── Repair Modal ────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.35s;
+    }
+    .modal-overlay.visible { opacity: 1; pointer-events: all; }
+    .modal-box {
+      background: rgba(40, 22, 12, 0.85);
+      backdrop-filter: blur(60px) saturate(200%);
+      -webkit-backdrop-filter: blur(60px) saturate(200%);
+      border-radius: var(--radius-lg);
+      padding: 40px 36px; max-width: 440px; width: 90%;
+      border: 1px solid var(--border-glass);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+      transform: scale(0.95); transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal-overlay.visible .modal-box { transform: scale(1); }
+    .modal-box.wide { max-width: 850px; padding: 48px; }
+    
+    .ai-rationale-header { text-align: center; margin-bottom: 32px; }
+    .ai-rationale-header h3 { font-size: 28px; margin-bottom: 12px; }
+    .ai-rationale-header p { font-size: 16px; color: var(--text-secondary); max-width: 600px; margin: 0 auto; line-height: 1.5; }
+    
+    .ai-rationale-list { 
+      margin-top: 24px; 
+      display: grid; 
+      grid-template-columns: repeat(3, 1fr); 
+      gap: 24px; 
+      text-align: left; 
+    }
+    
+    .ai-rationale-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .ai-rationale-item::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+      opacity: 0; transition: opacity 0.3s ease;
+    }
+    
+    .ai-rationale-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+    }
+    
+    .ai-rationale-item:hover::before { opacity: 1; }
+    
+    .ai-icon-wrapper {
+      font-size: 28px; margin-bottom: 16px; display: inline-block;
+      background: rgba(212,160,23,0.1);
+      padding: 12px; border-radius: 50%;
+      border: 1px solid rgba(212,160,23,0.2);
+    }
+    
+    .ai-rationale-item h4 { 
+      color: var(--text-primary); 
+      margin: 0 0 12px 0; 
+      font-size: 16px; 
+      font-weight: 700; 
+      line-height: 1.3;
+    }
+    
+    .ai-rationale-item p { 
+      color: var(--text-secondary); 
+      margin: 0; 
+      font-size: 14px; 
+      line-height: 1.6; 
+    }
+
+    @media (max-width: 768px) {
+      .ai-rationale-list { grid-template-columns: 1fr; }
+    }
+    .modal-overlay.visible .modal-box { transform: scale(1) translateY(0); }
+    .modal-box h3 {
+      font-size: 22px; font-weight: 800; margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-red-bright));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .modal-box p { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; }
+    .modal-box input {
+      width: 100%; padding: 14px 20px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-glass);
+      background: rgba(92,58,30,0.2);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: var(--text-primary);
+      font-family: inherit; font-size: 15px; text-align: center;
+      margin-bottom: 20px; transition: all var(--transition);
+    }
+    .modal-box input:focus {
+      outline: none;
+      border-color: var(--accent-gold);
+      box-shadow: 0 0 0 3px rgba(212,160,23,0.12);
+    }
+    .modal-box input::placeholder { color: var(--text-subdued); }
+    .modal-actions { display: flex; gap: 12px; justify-content: center; }
+    .modal-actions button {
+      padding: 12px 28px; border-radius: var(--radius-xl); border: none;
+      font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: all var(--transition);
+    }
+    .btn-repair-submit {
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light));
+      color: #1a0c04;
+      box-shadow: 0 4px 16px rgba(212,160,23,0.25);
+    }
+    .btn-repair-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(212,160,23,0.4);
+    }
+    .btn-repair-dismiss {
+      background: rgba(92,58,30,0.15);
+      color: var(--text-subdued);
+      border: 1px solid rgba(92,58,30,0.25) !important;
+    }
+    .btn-repair-dismiss:hover { color: var(--text-primary); background: rgba(92,58,30,0.25); }
+
+    /* ── Repair Result Card ──────────────── */
+    .repair-result {
+      margin-top: 24px; padding: 24px;
+      background: linear-gradient(135deg, rgba(212,160,23,0.08), rgba(192,57,43,0.04));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(212,160,23,0.2);
+      box-shadow: var(--shadow-glow-gold);
+      animation: fadeSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .repair-note {
+      font-size: 13px; font-weight: 700; margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+      background: linear-gradient(90deg, var(--accent-gold), var(--accent-gold-light));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Loading ──────────────────────────── */
+    .loading-bar {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; padding: 60px; color: var(--text-subdued);
+      font-size: 14px;
+    }
+    .dot-pulse { display: flex; gap: 5px; }
+    .dot-pulse span {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-red), var(--accent-gold));
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    .dot-pulse span:nth-child(2) { animation-delay: 0.2s; }
+    .dot-pulse span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse {
+      0%,100% { opacity: 0.2; transform: scale(0.7); }
+      50% { opacity: 1; transform: scale(1.3); }
+    }
+
+    /* ── Scrollbar ────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(212,160,23,0.15);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(212,160,23,0.3); }
+
+    /* ── Responsive ──────────────────────── */
+    @media (max-width: 640px) {
+      header { padding: 12px 16px; }
+      .logo { font-size: 20px; }
+      .logo-icon { width: 30px; height: 30px; font-size: 15px; }
+      main { padding: 24px 16px 80px; }
+      .section-header h1 { font-size: 22px; }
+      .track-card { flex-direction: column; gap: 16px; padding: 20px; }
+      .track-art { width: 100%; height: 160px; border-radius: var(--radius-md); }
+      .rde-body { padding: 24px 16px; }
+      .rde-controls { flex-direction: column; }
+      .rde-controls select { max-width: 100%; min-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── Header ─────────────────────────────────── -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">♪</div>
+      <span class="logo-text">Spotify</span>
+    </div>
+    <div class="header-actions">
+      <span class="stats-pill" id="statsPill">100 reviews · 2 sources</span>
+      <button class="btn-rde" id="showAiRationale" onclick="showAIModal()" style="margin-right: 12px; background: rgba(192, 57, 43, 0.1); border-color: rgba(192, 57, 43, 0.3); color: var(--accent-red-bright);">✨ Why AI?</button>
+      <a href="workflow.html" target="_blank" class="btn-rde" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">Discovery Engine</a>
+    </div>
+  </header>
+
+  <!-- ─── Main: Why This ─────────────────────────── -->
+  <main id="whyThisView">
+    <div class="section-header">
+      <h1><span class="fire">🔥</span> Your Picks · <span class="count" id="trackCount">5 Tracks</span></h1>
+    </div>
+    <div class="context-bar">
+      <input type="text" id="moodInput" placeholder="What mood are you in? e.g. wind-down, focus, energy (optional)">
+      <button class="btn-refresh" onclick="loadTracks()">Refresh</button>
+    </div>
+    <div id="trackList" class="track-list">
+      <div class="loading-bar">
+        <div class="dot-pulse"><span></span><span></span><span></span></div>
+        <span>Loading tracks…</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- ─── Repair Modal ───────────────────────────── -->
+  <div class="modal-overlay" id="repairModal">
+    <div class="modal-box">
+      <h3>🎯 Not landing?</h3>
+      <p>Tell us in one word what's off - we'll adjust.</p>
+      <input type="text" id="repairInput" placeholder="e.g., too slow, boring, intense">
+      <div class="modal-actions">
+        <button class="btn-repair-submit" onclick="submitRepair()">Adjust</button>
+        <button class="btn-repair-dismiss" onclick="dismissRepair()">No thanks</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── AI Rationale Modal ──────────────────────── -->
+  <div class="modal-overlay" id="aiModal">
+    <div class="modal-box wide">
+      
+      <div class="ai-rationale-header">
+        <h3>🤖 Why AI is Uniquely Suited</h3>
+        <p>Our research shows this is a <strong>trust</strong> problem, not just an accuracy problem. Here is why Generative AI + RAG is required to solve it.</p>
+      </div>
+      
+      <div class="ai-rationale-list">
+        <div class="ai-rationale-item">
+          <div class="ai-icon-wrapper">📉</div>
+          <h4>Why traditional systems fail</h4>
+          <p>Collaborative filtering is excellent at predicting vectors, but it operates as a "black box." It silently hands users tracks without explaining <em>why</em>. When it misses, it fails silently—leaving the user with no recourse other than skipping.</p>
+        </div>
+        
+        <div class="ai-rationale-item">
+          <div class="ai-icon-wrapper">🔓</div>
+          <h4>What Gen-AI + RAG unlocks</h4>
+          <p>AI bridges the communication gap by translating vector similarities into natural language ("Similar layered vocals to Fleet Foxes"). RAG provides <strong>peer proof at scale</strong> by instantly retrieving real user reviews. AI also enables natural language repair (e.g., "too slow").</p>
+        </div>
+        
+        <div class="ai-rationale-item">
+          <div class="ai-icon-wrapper">✨</div>
+          <h4>How the UX changes</h4>
+          <p>It transforms passive consumption into a transparent dialogue. By providing an explanation ("Why This"), we build trust <em>before</em> play. When a miss happens, the repair prompt turns a frustrating exit into a constructive feedback loop.</p>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 40px; justify-content: center;">
+        <button class="btn-repair-dismiss" onclick="dismissAIModal()" style="padding: 12px 32px; font-size: 15px;">Close Panel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── JavaScript ─────────────────────────────── -->
+  <script>
+    // ── State ──────────────────────────────
+    const state = {
+      tracks: [],
+      consecutiveSkips: 0,
+      skippedIds: [],
+      savedIds: [],
+      playingId: null,
+      workflowDone: false,
+    };
+
+    // ── Init ───────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      loadTracks();
+    });
+
+    // ── Track Loading ──────────────────────
+    
+    // STATIC OVERRIDE FOR GITHUB PAGES
+    const STATIC_TRACKS = [{"id": "track_1", "title": "Blinding Lights", "artist": "The Weeknd", "genre": "Synth-Pop", "duration": "3:20", "mood_tags": ["upbeat", "energetic", "driving"], "tempo": "fast", "energy": "high", "has_lyrics": true, "year": 2019, "album": "After Hours", "anchor_artist": "Daft Punk", "art_colors": ["#8b0000", "#ff0000", "#1a1a1a"], "why_this": "High-BPM synth-pop that channels Daft Punk's retro-futurism - perfect for listeners seeking an immediate, driving rhythm.", "listener_quote": {"text": "Just tell me WHY you picked something - 'because this artist collaborated with someone you saved last week' would be enough.", "source": "User Interview \u00b7 Srivatsan (Frustrated Discoverer)"}, "context_used": "default"}, {"id": "track_2", "title": "Cornfield Chase", "artist": "Hans Zimmer", "genre": "Soundtrack", "duration": "2:06", "mood_tags": ["cinematic", "instrumental", "focus"], "tempo": "moderate", "energy": "medium", "has_lyrics": false, "year": 2014, "album": "Interstellar (Original Motion Picture Soundtrack)", "anchor_artist": "Ludovico Einaudi", "art_colors": ["#d4a373", "#faedcd", "#fefae0"], "why_this": "Cinematic and purely instrumental - Hans Zimmer's intricate organ arrangement provides a deep, immersive listening experience.", "listener_quote": {"text": "The algorithm doesn't understand that my taste shifts based on context: gym music is completely different from my commute playlist.", "source": "User Interview \u00b7 Syed (Churned Discoverer)"}, "context_used": "default"}, {"id": "track_3", "title": "Pink + White", "artist": "Frank Ocean", "genre": "R&B / Soul", "duration": "3:04", "mood_tags": ["chill", "mellow", "evening"], "tempo": "slow", "energy": "medium", "has_lyrics": true, "year": 2016, "album": "Blonde", "anchor_artist": "Daniel Caesar", "art_colors": ["#4a7c59", "#c8d5b9", "#faf3dd"], "why_this": "Lush, string-heavy R&B that strips away heavy beats in favor of Frank Ocean's distinct vocal texture and Daniel Caesar-like warmth.", "listener_quote": {"text": "When it misses, it misses badly, and there's no way to say 'not this mood right now' without skipping.", "source": "User Interview \u00b7 Sakthi (Satisfied but curious)"}, "context_used": "default"}, {"id": "track_4", "title": "Glimpse of Us", "artist": "Joji", "genre": "Pop Ballad", "duration": "3:53", "mood_tags": ["sad", "piano", "emotional"], "tempo": "slow", "energy": "low", "has_lyrics": true, "year": 2022, "album": "SMITHEREENS", "anchor_artist": "Rex Orange County", "art_colors": ["#2b2d42", "#8d99ae", "#edf2f4"], "why_this": "A raw, piano-driven ballad that leans entirely into emotional resonance rather than production tricks, reminiscent of early Rex Orange County.", "listener_quote": {"text": "On a Sunday evening when I'm winding down, I don't want the high-energy workout music that I listened to that morning.", "source": "User Interview \u00b7 Arun (Context-Seeking Discoverer)"}, "context_used": "default"}, {"id": "track_5", "title": "L$D", "artist": "A$AP Rocky", "genre": "Psychedelic Hip-Hop", "duration": "3:58", "mood_tags": ["psychedelic", "late-night", "ambient"], "tempo": "slow", "energy": "low", "has_lyrics": true, "year": 2015, "album": "AT.LONG.LAST.A$AP", "anchor_artist": "Kid Cudi", "art_colors": ["#5a189a", "#7b2cbf", "#9d4edd"], "why_this": "Psychedelic, atmospheric hip-hop that prioritizes trippy textures and a slow, hypnotic groove over traditional rap cadences.", "listener_quote": {"text": "One bad week undoes three good ones in my head... it feels like shouting into a void when I skip something.", "source": "User Interview \u00b7 Gourav (Inconsistency-Frustrated)"}, "context_used": "default"}];
+    const STATIC_REPAIR = {"id": "mock_repair_1", "name": "Adjusted Track (Mock)", "artist": "Static AI", "album_art": "https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228", "why_this": "Because you asked for an adjustment, we switched to a different vibe (Static Demo).", "listeners_said": "This was the perfect course correction.", "listener_source": "App Store Review"};
+
+    async function loadTracks() {
+      const list = document.getElementById('trackList');
+      list.innerHTML = '<div class="loading-bar"><div class="dot-pulse"><span></span><span></span><span></span></div><span>Loading tracks…</span></div>';
+      
+      setTimeout(() => {
+        state.tracks = STATIC_TRACKS;
+        state.consecutiveSkips = 0;
+        state.skippedIds = [];
+        state.playingId = null;
+        document.getElementById('trackCount').textContent = state.tracks.length + ' Tracks';
+        renderTracks(state.tracks);
+      }, 500);
+    }
+
+    function skipTrack(id) {
+      if (!state.skippedIds.includes(id)) state.skippedIds.push(id);
+      state.consecutiveSkips++;
+      state.playingId = null;
+      renderTracks(state.tracks);
+
+      // After 2 consecutive skips → repair prompt
+      if (state.consecutiveSkips >= 2) {
+        setTimeout(() => showRepair(), 400);
+      }
+    }
+
+    // ── Repair Flow ────────────────────────
+    function showRepair() {
+      document.getElementById('repairModal').classList.add('visible');
+      document.getElementById('repairInput').value = '';
+      document.getElementById('repairInput').focus();
+    }
+
+    function dismissRepair() {
+      document.getElementById('repairModal').classList.remove('visible');
+      state.consecutiveSkips = 0;
+    }
+
+    async function submitRepair() {
+      const feedback = document.getElementById('repairInput').value.trim();
+      if (!feedback) return;
+
+      document.getElementById('repairModal').classList.remove('visible');
+
+      const resp = await fetch('/api/repair', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ feedback, skipped_ids: state.skippedIds }),
+      });
+      const data = await resp.json();
+      state.consecutiveSkips = 0;
+
+      // Show the repair result as a special card
+      const list = document.getElementById('trackList');
+      const repairDiv = document.createElement('div');
+      repairDiv.className = 'repair-result';
+      const t = data.track;
+      const colors = t.art_colors || ['#5c3a1e','#c0392b','#d4a017'];
+      repairDiv.innerHTML = `
+        <div class="repair-note">🔄 ${data.adjustment_note}</div>
+        <div class="track-card" style="margin:0;border-color:rgba(212,160,23,0.3);">
+          <div class="track-art" style="background: linear-gradient(135deg, ${colors[0]}, ${colors[1]}, ${colors[2]});">
+            <div class="track-art-inner">${t.title.charAt(0)}</div>
+          </div>
+          <div class="track-info">
+            <div class="track-title-row">
+              <div class="track-title">${t.title}</div>
+              <span class="track-artist">- ${t.artist}</span>
+            </div>
+            <div class="track-meta">${t.genre} <span class="dot"></span> ${t.duration} <span class="dot"></span> ${t.album} (${t.year})</div>
+            <div class="why-this-section">
+              <div class="why-this-label"><span class="icon">✦</span> <span class="label-text">WHY THIS - ADJUSTED</span></div>
+              <div class="why-this-text">${data.why_this}</div>
+            </div>
+            <div class="listeners-section">
+              <div class="listeners-label"><span class="icon">💬</span> <span class="label-text">LISTENERS SAID</span></div>
+              <div class="listeners-text">"${data.listener_quote.text}"</div>
+              <div class="listeners-source"><span class="src-icon">📍</span> ${data.listener_quote.source}</div>
+            </div>
+            <div class="track-actions">
+              <button class="btn-play" onclick="playTrack('${t.id}')">▶ Play</button>
+              <button class="btn-save" onclick="saveTrack('${t.id}')">♡ Save</button>
+            </div>
+          </div>
+        </div>
+      `;
+      list.prepend(repairDiv);
+      repairDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // Enter key support
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        if (document.activeElement === document.getElementById('repairInput')) submitRepair();
+        if (document.activeElement === document.getElementById('moodInput')) loadTracks();
+
+      }
+      if (e.key === 'Escape') {
+        dismissRepair();
+      }
+    });
+    /* ─── AI Modal Logic ────────────── */
+    function showAIModal() {
+      document.getElementById("aiModal").classList.add("visible");
+    }
+    function dismissAIModal() {
+      document.getElementById("aiModal").classList.remove("visible");
+    }
+  </script>
+</body>
+</html>

