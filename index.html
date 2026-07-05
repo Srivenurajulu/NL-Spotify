@@ -720,57 +720,7 @@
       state.consecutiveSkips = 0;
     }
 
-    async function submitRepair() {
-      const feedback = document.getElementById('repairInput').value.trim();
-      if (!feedback) return;
 
-      document.getElementById('repairModal').classList.remove('visible');
-
-      const resp = await fetch('/api/repair', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ feedback, skipped_ids: state.skippedIds }),
-      });
-      const data = await resp.json();
-      state.consecutiveSkips = 0;
-
-      // Show the repair result as a special card
-      const list = document.getElementById('trackList');
-      const repairDiv = document.createElement('div');
-      repairDiv.className = 'repair-result';
-      const t = data.track;
-      const colors = t.art_colors || ['#5c3a1e','#c0392b','#d4a017'];
-      repairDiv.innerHTML = `
-        <div class="repair-note">🔄 ${data.adjustment_note}</div>
-        <div class="track-card" style="margin:0;border-color:rgba(212,160,23,0.3);">
-          <div class="track-art" style="background: linear-gradient(135deg, ${colors[0]}, ${colors[1]}, ${colors[2]});">
-            <div class="track-art-inner">${t.title.charAt(0)}</div>
-          </div>
-          <div class="track-info">
-            <div class="track-title-row">
-              <div class="track-title">${t.title}</div>
-              <span class="track-artist">- ${t.artist}</span>
-            </div>
-            <div class="track-meta">${t.genre} <span class="dot"></span> ${t.duration} <span class="dot"></span> ${t.album} (${t.year})</div>
-            <div class="why-this-section">
-              <div class="why-this-label"><span class="icon">✦</span> <span class="label-text">WHY THIS - ADJUSTED</span></div>
-              <div class="why-this-text">${data.why_this}</div>
-            </div>
-            <div class="listeners-section">
-              <div class="listeners-label"><span class="icon">💬</span> <span class="label-text">LISTENERS SAID</span></div>
-              <div class="listeners-text">"${data.listener_quote.text}"</div>
-              <div class="listeners-source"><span class="src-icon">📍</span> ${data.listener_quote.source}</div>
-            </div>
-            <div class="track-actions">
-              <button class="btn-play" onclick="playTrack('${t.id}')">▶ Play</button>
-              <button class="btn-save" onclick="saveTrack('${t.id}')">♡ Save</button>
-            </div>
-          </div>
-        </div>
-      `;
-      list.prepend(repairDiv);
-      repairDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
 
     // Enter key support
     document.addEventListener('keydown', (e) => {

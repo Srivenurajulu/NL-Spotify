@@ -274,6 +274,50 @@
       sel.innerHTML = STATIC_QUESTIONS.map(q => `<option value="${q.key}">${q.title}</option>`).join('');
     }
 
+    function mdToHtml(md) {
+      let html = md;
+      html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+      html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+      html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+      html = html.replace(/^  (\d+)\. "(.+)"$/gm, '<blockquote><strong>[$1]</strong> "$2"</blockquote>');
+      html = html.replace(/^  [•] (.+)$/gm, '<li>$1</li>');
+      html = html.replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>');
+      const lines = html.split('\n');
+      let result = [];
+      for (let line of lines) {
+        const trimmed = line.trim();
+        if (trimmed === '') result.push('');
+        else if (trimmed.startsWith('<')) result.push(trimmed);
+        else result.push('<p>' + trimmed + '</p>');
+      }
+      return result.join('\n');
+    }
+
+    async function analyzeRDE() {
+      const status = document.getElementById('rdeStatus');
+      const answerBox = document.getElementById('rdeAnswer');
+      const header = document.getElementById('rdeAnswerHeader');
+      const body = document.getElementById('rdeAnswerBody');
+
+      answerBox.classList.remove('visible');
+      status.innerHTML = '<div class="dot-pulse"><span></span><span></span><span></span></div> Running RAG analysis…';
+
+      const qKey = document.getElementById('rdeSelect').value;
+      const data = STATIC_ANSWERS[qKey];
+
+      setTimeout(() => {
+        if(data) {
+            status.innerHTML = `✅ Analysis complete - <strong>${data.evidence_count} evidence documents</strong> retrieved`;
+            header.textContent = data.question;
+            body.innerHTML = mdToHtml(data.answer);
+            answerBox.classList.add('visible');
+        } else {
+            status.innerHTML = '❌ Analysis failed';
+        }
+      }, 800);
+    }
     </script>
 </body>
 </html>
